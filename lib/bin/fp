@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+echo "----------"
+echo "Floatplane CLI"
+echo "----------"
+
+wd=$(dirname -- "$(readlink -f -- "$0")")
+cd $wd
+cd ../actions
+
+if [ "$1" == 'setup' ];
+then
+  sh ./setup.sh
+fi
+
+if [ "$1" == 'deploy' ];
+then
+  sh ./deploy.sh
+fi
