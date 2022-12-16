@@ -32,3 +32,32 @@ This command will:
 - Set up a Node, Deno or Ruby based project on your server
 - Configure Nginx to direct your domain to your project
 - Set up a deployment hook for CLI tools to hit
+
+### 3. Deploy a project
+
+```
+fp deploy
+```
+
+This command will:
+
+- Ask you which project to deploy
+- Hit the deployment hook of your project to deploy the latest production code
+
+Ideally have your CI tools do this. But yes, sometimes a manual deploy is necessary.
+
+---
+
+### How to install this CLI
+
+Please first sanity check if `echo $PATH` includes `/usr/local/`. If yes, continue.
+
+```bash
+git clone git@github.com:floatplane-dev/floatplane-cli.git
+cd floatplane-cli
+mkdir /usr/local/lib/fp/
+cp -r lib/ /usr/local/lib/fp/
+ln -s /usr/local/lib/fp/bin/fp /usr/local/bin/fp
+```
+
+Then finally test by running `fp` should show you a success message.
