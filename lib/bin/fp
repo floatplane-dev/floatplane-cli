@@ -6,16 +6,42 @@ echo "----------"
 echo "Floatplane CLI"
 echo "----------"
 
+# Get the work directory in which this file is located.
 wd=$(dirname -- "$(readlink -f -- "$0")")
+
+# Go to the directory with all the scripts (actions)
 cd $wd
 cd ../actions
 
-if [ "$1" == 'setup' ];
+# fp setup
+# Asks whether you want to set up a server or project
+if [ "$1" == 'setup' ] && [ -z $2 ];
 then
   sh ./setup.sh
+  exit 0
+fi
+
+# fp setup server
+# Asks questions and then sets up server
+if [ "$1" == 'setup' ] && [ "$2" == 'server' ];
+then
+  sh ./setup-server.sh
+  exit 0
+fi
+
+# fp setup project
+# Asks questions and then sets up project on server
+if [ "$1" == 'setup' ] &&  [ "$2" == 'project' ];
+then
+  sh ./setup-project.sh
+  exit 0
 fi
 
 if [ "$1" == 'deploy' ];
 then
   sh ./deploy.sh
+  exit 0
 fi
+
+echo "⛵"
+echo "----------"
