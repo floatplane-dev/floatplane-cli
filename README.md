@@ -54,10 +54,16 @@ Please first sanity check if `echo $PATH` includes `/usr/local/`. If yes, contin
 
 ```bash
 git clone git@github.com:floatplane-dev/floatplane-cli.git
-cd floatplane-cli
-mkdir /usr/local/lib/fp/
-cp -r lib/ /usr/local/lib/fp/
-ln -s /usr/local/lib/fp/bin/fp /usr/local/bin/fp
+cd floatplane-cli/
+./install.sh
 ```
 
 Then finally test by running `fp` should show you a success message.
+
+### Upgrade the CLI
+
+```bash
+cd floatplane-cli/
+git pull
+./install.sh
+```
