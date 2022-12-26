@@ -9,9 +9,9 @@ echo "----------"
 # Get the work directory in which this file is located.
 wd=$(dirname -- "$(readlink -f -- "$0")")
 
-# Go to the directory with all the scripts (actions)
+# Go to the directory with all the scripts
 cd $wd
-cd ../actions
+cd ../scripts
 
 # fp setup
 # Asks whether you want to set up a server or project

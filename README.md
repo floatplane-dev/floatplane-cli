@@ -15,9 +15,25 @@ This command will:
 - locks down the root user 🔒
 - prevent password logins
 - close all ports except HTTP, HTTPS and SSH
-- activate firewall
-- install Fish as default shell 🐠
-- install missing packages
+- configure and activate firewall
+- configure certbot
+- set Fish as default shell 🐠
+- spin up Nginx
+- install tools:
+  - git
+  - curl
+  - nginx
+  - certbot
+  - ufw
+  - fish
+  - rbenv
+  - NVM
+  - Node
+  - NPM
+  - PNPM
+  - Yarn
+  - PM2
+  - Deno 🦕
 
 Tested and optimised for Debian servers spun up at [Vultr](https://www.vultr.com) or [Digital Ocean](https://www.digitalocean.com).
 

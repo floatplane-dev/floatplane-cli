@@ -3,9 +3,6 @@
 set -e
 
 echo "----------"
-echo "Checking SSH status"
-sudo service ssh status
-echo "----------"
 echo "Locking down the root user..."
 sudo service ssh restart
 echo "----------"
