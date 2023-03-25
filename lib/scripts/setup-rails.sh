@@ -1,13 +1,12 @@
 #!/bin/bash
 
-set -e
-set -o pipefail
+set -eou pipefail
 
 domain=$1
 repo=$2
 redirect_www=$3
 
-echo "Setting up Ember project 🐹 ..."
+echo "Setting up Rails project 🐹 ..."
 echo "domain=$domain"
 echo "repo=$repo"
 echo "----------"
@@ -65,62 +64,79 @@ echo "Pulling latest production code ..."
   git pull
 )
 
-# NVM
+echo "DONE BRO"
 
-if [ -f ".nvmrc" ]; then
-  echo "----------"
-  echo "Installing Node with NVM ..."
+exit 0;
 
-  # This hack makes the nvm binary available to this script.
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# RBENV
 
-  nvm install
-fi
+# should already have been installed during server setup
 
-# NODE MODULES
+# RUBY
 
-if [ -f "package.json" ]; then
-  echo "Found package.json"
-  if [ -f ".npmrc" ]; then
-    echo "----------"
-    echo "Found .npmrc"
-    echo "Installing Node packages with PNPM ..."
-    ( set -x; pnpm install )
+echo "----------"
+echo "Installing Ruby ..."
+rbenv install --skip-existing
 
-    echo "----------"
-    echo "Building dist ..."
-    ( set -x; pnpm build )
-  fi
+# BUNDLER
 
-  if [ -f "yarn.lock" ]; then
-    echo "----------"
-    echo "Found yarn.lock"
-    echo "Installing Node packages with Yarn ..."
-    ( set -x; yarn install )
+# https://bundler.io/blog/2022/01/23/bundler-v2-3.html
+# https://bundler.io/blog/2019/05/14/solutions-for-cant-find-gem-bundler-with-executable-bundle.html
+# Until Bundler 2.3 we need to install the exact version ourselves.
+# gem install bundler:2.4.6
 
-    echo "----------"
-    echo "Building dist ..."
-    ( set -x; yarn build )
-  fi
-fi
+echo "----------"
+echo "Installing Bundler ..."
+gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
 
-# PM2
+# GEMS
 
-if [ -f "ecosystem.config.js" ]; then
-  echo "----------"
-  echo "Starting PM2 daemon ..."
-  ( set -x; pm2 start )
-fi
+echo "----------"
+echo "Installing gems ..."
+bundle install
 
-# EMBER FASTBOOT
+# POSTGRESS
 
-if [ -f "fastboot.js" ]; then
-  echo "----------"
-  echo "Spinning up Fastboot ..."
-  ( set -x; pm2 start fastboot.js )
-fi
+# Postgress should already have been installed during server setup.
+
+# POSTGRESS USER
+
+echo "----------"
+echo "Creating Postgres user named \"admin\"..."
+sudo -u postgres createuser -s admin
+
+echo "----------"
+echo "Please enter a secure password for this user and store in password manager:"
+read -s postgres_admin_password
+sudo -u postgres psql -c "ALTER USER admin WITH PASSWORD '$postgres_admin_password';"
+
+# SET UP SECRETS
+
+echo "----------"
+echo "Please enter the production environment secrets for .rbenv-vars. Use the following format:"
+cat .rbenv-vars.example
+read -s rbenv_vars
+echo $rbenv_vars >> .rbenv-vars
+
+# CREATE DATABASE
+
+echo "----------"
+echo "Creating database ..."
+export RAILS_ENV=production
+bin/rails db:create
+
+# DATABASE SCHEMA
+
+echo "----------"
+echo "Apply database schema..."
+bin/rails db:schema:load
+
+# PUMA
+
+bin/puma -e production
+
+# NGINX, CERTBOT, HTTPS CERTIFICATES
+
 
 echo "----------"
 echo "Configuring Nginx for HTTP..."
@@ -161,7 +177,7 @@ echo "----------"
 echo "Done!"
 echo "----------"
 echo "NEXT STEPS"
-echo "👉🏼 Open $domain in your browser. Are we live?!"
-echo "👉🏼 Manually add environment secrets such as .env files, then rebuild."
-echo "👉🏼 Set up automated deploy pipeline for production (CD)"
+echo "👉🏼 Hit the API with curl to sanity test if live."
+echo "👉🏼 Manually seed the database with data."
+echo "👉🏼 Set up automated tests and deploys (CI/CD)"
 echo "----------"
