@@ -9,6 +9,7 @@ echo "What kind of project?"
 options[0]="Ember 🐹"
 options[1]="Deno 🦕"
 options[2]="Rails 🛤️"
+options[3]="Gulp 🍹"
 select tech in "${options[@]}"
 do
   if [[ "${options[*]}" =~ "${tech}" ]]; then
@@ -62,13 +63,47 @@ if [[ $tech == "Ember 🐹" ]]; then
 fi
 
 if [[ $tech == "Deno 🦕" ]]; then
-  scp ./setup-project-deno.sh $server:~/
-  ssh -t $server "~/setup-project-deno.sh $domain $repo $redirect_www"
+  scp ./setup-github.sh $server:~/
+  ssh -t $server "~/setup-github.sh $domain"
+  scp ./setup-deno.sh $server:~/
+  ssh -t $server "~/setup-deno.sh $domain"
+  scp ./setup-nginx.sh $server:~/
+  ssh -t $server "~/setup-nginx.sh $domain"
+  echo "----------"
+  echo "Done!"
+  echo "----------"
+  echo "Possible next steps:"
+  echo "👉🏼 Check if Deno API is alive with: curl https://$domain/sanity-check"
+  echo "👉🏼 Populate the database"
+  echo "----------"
 fi
 
 if [[ $tech == "Rails 🛤️" ]]; then
   scp ./setup-project-rails.sh $server:~/
   ssh -t $server "~/setup-project-rails.sh $domain $repo $redirect_www"
+fi
+
+if [[ $tech == "Gulp 🍹" ]]; then
+  scp ./setup-github.sh $server:~/
+  ssh -t $server "~/setup-github.sh $domain"
+  scp ./setup-gulp.sh $server:~/
+  ssh -t $server "~/setup-gulp.sh $domain"
+  scp ./setup-nginx.sh $server:~/
+  ssh -t $server "~/setup-nginx.sh $domain"
+  echo "----------"
+  echo "Done!"
+  echo "----------"
+  echo "FINAL STEP:"
+  echo "👉🏼 Open $domain in your browser. Check whether all is working!"
+  sleep 1
+  echo "3"
+  sleep 1
+  echo "2"
+  sleep 1
+  echo "1"
+  sleep 1
+  open https://$domain
+  echo "----------"
 fi
 
 echo "----------"
