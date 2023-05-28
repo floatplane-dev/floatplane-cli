@@ -35,7 +35,7 @@ echo "Installing PM2 ..."
 yarn global add pm2
 echo "----------"
 echo "Installing missing packages for compiling Ruby ..."
-sudo apt install -y build-essential libssl-dev libreadline-dev zlib1g-dev
+sudo apt install -y build-essential libssl-dev libreadline-dev zlib1g-dev libtool libyaml-dev
 echo "----------"
 echo "Installing Postgres ..."
 sudo apt install -y postgresql postgresql-contrib libpq-dev
