@@ -79,8 +79,20 @@ if [[ $tech == "Deno 🦕" ]]; then
 fi
 
 if [[ $tech == "Rails 🛤️" ]]; then
+  scp ./setup-github.sh $server:~/
+  ssh -t $server "~/setup-github.sh $domain"
   scp ./setup-rails.sh $server:~/
-  ssh -t $server "~/setup-rails.sh $domain $repo $redirect_www"
+  ssh -t $server "~/setup-rails.sh $domain"
+  scp ./setup-nginx.sh $server:~/
+  ssh -t $server "~/setup-nginx.sh $domain"
+  echo "----------"
+  echo "Done!"
+  echo "----------"
+  echo "NEXT STEPS"
+  echo "👉🏼 Hit the API with curl to sanity test if live."
+  echo "👉🏼 Manually seed the database with data."
+  echo "👉🏼 Set up automated tests and deploys (CI/CD)"
+  echo "----------"
 fi
 
 if [[ $tech == "Gulp 🍹" ]]; then
