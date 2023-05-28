@@ -15,7 +15,9 @@ echo "domain=$domain"
 
 echo "----------"
 echo "Installing Ruby ..."
-rbenv install --skip-existing
+rbenv install $(cat .ruby-version) --skip-existing
+# Works on Mac, but not on Debian
+# rbenv install --skip-existing
 
 # BUNDLER
 
