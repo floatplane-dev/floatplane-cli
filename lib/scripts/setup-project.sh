@@ -79,8 +79,8 @@ if [[ $tech == "Deno 🦕" ]]; then
 fi
 
 if [[ $tech == "Rails 🛤️" ]]; then
-  scp ./setup-project-rails.sh $server:~/
-  ssh -t $server "~/setup-project-rails.sh $domain $repo $redirect_www"
+  scp ./setup-rails.sh $server:~/
+  ssh -t $server "~/setup-rails.sh $domain $repo $redirect_www"
 fi
 
 if [[ $tech == "Gulp 🍹" ]]; then
