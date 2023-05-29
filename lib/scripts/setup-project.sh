@@ -79,6 +79,22 @@ if [[ $tech == "Deno 🦕" ]]; then
 fi
 
 if [[ $tech == "Rails 🛤️" ]]; then
+  echo "Does your Rails codebase meet these criteria?"
+  echo "✅ It has .ruby-version"
+  echo "✅ It has .rbenv-vars.example"
+  echo "✅ It has config/credentials.yml.enc"
+  echo "✅ It does not have config/master.key"
+  yesno=(yes no)
+  select answer in ${yesno[@]}
+  do
+    if [ "$answer" == "yes" ]; then
+      break
+    elif [ "$answer" == "no" ]; then
+      echo "Please do so now and git push."
+    else
+      echo "Please enter a number from the list."
+    fi
+  done
   scp ./setup-github.sh $server:~/
   ssh -t $server "~/setup-github.sh $domain"
   scp ./setup-rails.sh $server:~/

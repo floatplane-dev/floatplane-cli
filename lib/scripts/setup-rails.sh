@@ -9,6 +9,7 @@ echo "Setting up Rails 🛤️ ..."
 echo "----------"
 echo "Changing directory ..."
 cd /var/www/$domain
+echo "----------"
 
 # RBENV
 
@@ -64,6 +65,12 @@ sudo -u postgres psql -c "ALTER USER admin WITH PASSWORD '$postgres_admin_passwo
 
 # SET UP SECRETS
 
+# Documentation on how to set up Rails credentials and master key:
+# https://gist.github.com/db0sch/19c321cbc727917bc0e12849a7565af9
+echo "----------"
+echo "Please enter the config/master.key:"
+read -s master_key
+echo $master_key >> config/master.key
 echo "----------"
 echo "Please enter the production environment secrets for .rbenv-vars. Use the following format:"
 cat .rbenv-vars.example
