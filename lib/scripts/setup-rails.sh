@@ -1,11 +1,14 @@
 #!/bin/bash
 
-set -eou pipefail
+set -e
 
 domain=$1
 
-echo "Setting up Rails project 🛤️ ..."
-echo "domain=$domain"
+echo "----------"
+echo "Setting up Rails 🛤️ ..."
+echo "----------"
+echo "Changing directory ..."
+cd /var/www/$domain
 
 # RBENV
 
@@ -15,14 +18,15 @@ echo "domain=$domain"
 
 echo "----------"
 echo "Installing Ruby ..."
-rubyversion=$(cat /var/www/$domain/.ruby-version)
+rubyversion=$(cat .ruby-version)
 echo $rubyversion
 rbenv install $rubyversion --skip-existing
 # Works on Mac, but not on Debian
 # rbenv install --skip-existing
 
 # Set this version as the default
-rbenv local $rubyversion
+# rbenv local $rubyversion
+# TODO: no longer needed?
 
 # BUNDLER
 
@@ -33,7 +37,9 @@ rbenv local $rubyversion
 
 echo "----------"
 echo "Installing Bundler ..."
-gem install bundler -v "$(grep -A 1 "BUNDLED WITH" /var/www/$domain/Gemfile.lock | tail -n 1)"
+bundlerversion=$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)
+echo $bundlerversion
+gem install bundler -v $bundlerversion
 
 # GEMS
 
