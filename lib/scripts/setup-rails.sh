@@ -30,7 +30,7 @@ rbenv install $rubyversion --skip-existing
 
 echo "----------"
 echo "Installing Bundler ..."
-gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
+gem install bundler -v "$(grep -A 1 "BUNDLED WITH" /var/www/$domain/Gemfile.lock | tail -n 1)"
 
 # GEMS
 
