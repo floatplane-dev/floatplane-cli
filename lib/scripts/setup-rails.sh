@@ -21,6 +21,9 @@ rbenv install $rubyversion --skip-existing
 # Works on Mac, but not on Debian
 # rbenv install --skip-existing
 
+# Set this version as the default
+rbenv local $rubyversion
+
 # BUNDLER
 
 # https://bundler.io/blog/2022/01/23/bundler-v2-3.html
