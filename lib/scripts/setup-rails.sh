@@ -54,14 +54,18 @@ bundle install
 
 # POSTGRESS USER
 
-echo "----------"
-echo "Creating Postgres user named \"admin\"..."
-sudo -u postgres createuser -s admin
-
-echo "----------"
-echo "Please enter a secure password for this user and store in password manager:"
-read -s postgres_admin_password
-sudo -u postgres psql -c "ALTER USER admin WITH PASSWORD '$postgres_admin_password';"
+if sudo -u postgres psql -t -c '\du' | cut -d \| -f 1 | grep -qw admin; then
+  echo "----------"
+  echo "Skipping Postgres user setup"
+else
+  echo "----------"
+  echo "Creating Postgres user named \"admin\"..."
+  sudo -u postgres createuser -s admin
+  echo "----------"
+  echo "Please enter a secure password for this user and store in password manager:"
+  read -s postgres_admin_password
+  sudo -u postgres psql -c "ALTER USER admin WITH PASSWORD '$postgres_admin_password';"
+fi
 
 # SET UP SECRETS
 
