@@ -59,7 +59,9 @@ ls -la /var/www/
 echo "----------"
 echo "Change owner of nginx directories"
 sudo chown -R admin:admin /etc/nginx/sites-enabled/
+sudo chown -R admin:admin /etc/nginx/sites-available/
 chmod -R g+s /etc/nginx/sites-enabled/
+chmod -R g+s /etc/nginx/sites-available/
 echo "----------"
 echo "Unlink the default Nginx page"
 sudo unlink /etc/nginx/sites-enabled/default
