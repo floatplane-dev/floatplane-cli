@@ -76,10 +76,14 @@ echo "Please enter the config/master.key:"
 read -s master_key
 echo $master_key >> config/master.key
 echo "----------"
-echo "Please enter the production environment secrets for .rbenv-vars. Use the following format:"
-cat .rbenv-vars.example
-read -s rbenv_vars
+echo "Please enter the production environment secrets for .rbenv-vars."
+echo "Use the following format:"
+echo "$(cat .rbenv-vars.example)"
+echo "----------"
+read rbenv_vars
+echo "----------"
 echo $rbenv_vars >> .rbenv-vars
+echo "----------"
 
 # CREATE DATABASE
 
