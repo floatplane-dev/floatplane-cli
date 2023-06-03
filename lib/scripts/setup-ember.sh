@@ -16,9 +16,12 @@ if [ -f ".env.example" ]; then
   echo "----------"
   echo "Enter the production environment variables for .env file."
   echo "Use the following format:"
-  cat .env.example
-  read -s env_vars
+  echo $(cat .env.example)
+  echo "----------"
+  read env_vars
+  echo "----------"
   echo $env_vars >> .env
+  echo "----------"
 fi
 
 # NVM
