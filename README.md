@@ -1,4 +1,4 @@
-# floatplane-cli
+# Floatplane CLI
 
 A command line tool for setting up and managing servers. ⛵
 
