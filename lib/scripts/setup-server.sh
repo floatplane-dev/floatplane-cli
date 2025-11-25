@@ -19,6 +19,8 @@ do
     echo "Please enter a number from the list."
   fi
 done
+[ "$option" == "no" ] && exit 0
+
 echo "----------"
 echo "Domain name linked to server?"
 read domain
