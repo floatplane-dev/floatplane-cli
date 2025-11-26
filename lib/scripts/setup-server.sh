@@ -5,25 +5,47 @@ set -o pipefail
 
 echo "Setting up server 🗿"
 echo "----------"
-echo "Have you done all of this?"
-echo "👉🏼 Created a Debian server on Vultr"
-echo "👉🏼 Decided on a memorable domain name for the server"
-echo "👉🏼 Created the A and AAAA records pointing at the server's IP"
+echo "Have you done the following?"
+echo "👉🏼 Created Debian server at Vultr with this name pattern:"
+echo "    ↳ sydney-server-floatplane-dev"
+echo "    ↳ frankfurt-server-interflux-com"
+echo "👉🏼 Created A and AAAA pointing to that server with identical name patterns:"
+echo "    ↳ sydney.server.floatplane.dev"
+echo "    ↳ frankfurt.server.interflux.com"
 options=("yes" "no")
-select option in ${options[@]}
-do
-  if [[ "${options[*]}" =~ "${option}" ]]; then
-    # TODO: catch and stop "no"
-    break
-  else
-    echo "Please enter a number from the list."
-  fi
+select option in "${options[@]}"; do
+  [ "$option" ] && break
+  echo "Please enter a number from the list."
 done
 [ "$option" == "no" ] && exit 0
-
 echo "----------"
-echo "Domain name linked to server?"
+echo "Enter the domain name (e.g. sydney.server.floatplane.dev):"
 read domain
+echo "----------"
+echo "Enter an SSH alias (e.g. sydney):"
+read alias
+echo "----------"
+ssh_pub_paths=(~/.ssh/*.pub)
+ssh_pub_files=("${ssh_pub_paths[@]##*/}")
+echo "Which public SSH key should be used?"
+select ssh_pub_file in "${ssh_pub_files[@]}"; do
+  [ -n "$ssh_pub_file" ] && break
+  echo "Please enter a number from the list."
+done
+ssh_pub_path="${ssh_pub_paths[$((REPLY-1))]}"
+echo "ssh_pub_path: $ssh_pub_path"
+echo "ssh_pub_file: $ssh_pub_file"
+echo "----------"
+local_name=$(scutil --get ComputerName)
+echo "Configuring SSH on: $local_name"
+echo "" >> ~/.ssh/config
+echo "" >> ~/.ssh/config
+cat <<EOF >> ~/.ssh/config
+Host $alias
+  User admin
+  HostName $domain
+  IdentityFile ~/.ssh/$ssh_pub_file
+EOF
 echo "----------"
 echo "Uploading part 1..."
 echo "You will need to enter the root password twice."
@@ -32,24 +54,9 @@ echo "----------"
 echo "Running part 1..."
 ssh root@$domain "/setup-server-1.sh"
 echo "----------"
-echo "Generating SSH key admin@$domain ..."
-private_key=~/.ssh/admin@$domain
-public_key=~/.ssh/admin@$domain.pub
-rm -rf $private_key
-rm -rf $public_key
-ssh-keygen -t rsa -b 4096 -C "admin@$domain" -f $private_key
-echo "----------"
-echo "Addding new SSH key to OpenSSH authentication agent"
-ssh-add --apple-use-keychain $private_key
-echo "----------"
-echo "Configuring SSH to always use this key for this server"
-echo "" >> ~/.ssh/config
-echo "Host $domain" >> ~/.ssh/config
-echo "IdentityFile $private_key" >> ~/.ssh/config
-echo "IdentitiesOnly=yes" >> ~/.ssh/config
-echo "----------"
-echo "Uploading public SSH key to server..."
-ssh-copy-id -i $public_key admin@$domain
+echo "Uploading $pub to server..."
+# Note: the -f is necessary when there is no private key adjacent to the .pub (we use 1Password)
+ssh-copy-id -f -i $ssh_pub_path admin@$domain
 echo "----------"
 echo "Uploading part 2..."
 scp ./setup-server-2.sh admin@$domain:~/
@@ -57,7 +64,8 @@ echo "----------"
 echo "Running part 2..."
 ssh -t admin@$domain "~/setup-server-2.sh"
 echo "----------"
-echo "Testing if root can still access server."
+echo "Testing if root can still access server..."
+echo "Enter the password of the root user 3 times:"
 if ! ssh root@$domain "pwd"
 then
   echo "Root SSH failed, which is good! 🥳"
@@ -92,6 +100,7 @@ echo "NEXT STEPS"
 echo ""
 echo "Wait 10 seconds, then SSH in with:"
 echo "🔑 ssh admin@$domain"
+echo "🔑 ssh $alias"
 echo ""
 echo "Then verify:"
 echo "👉🏼 SSH connection was successful (means Firewall did not lock you out)"
