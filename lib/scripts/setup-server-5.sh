@@ -6,51 +6,6 @@ set -U fish_greeting
 echo "----------"
 echo "Installing lambda theme for Fish ..."
 omf install lambda
-# TODO: omf install floatplane
-echo "----------"
-echo "Installing omf package for NVM ..."
-omf install nvm
-echo "----------"
-echo "Installing NVM ..."
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
-echo "----------"
-echo "Installing the latest Node LTS version ..."
-nvm install --lts
-echo "----------"
-echo "Setting the latest Node LTS version as default ..."
-nvm use --lts
-echo "----------"
-echo "Installing Yarn ..."
-curl -o- -L https://yarnpkg.com/install.sh | bash
-echo "----------"
-echo "Installing PNPM ..."
-curl -fsSL https://get.pnpm.io/install.sh | sh -
-source /home/admin/.config/fish/config.fish
-echo "----------"
-echo "Installing Deno ..."
-curl -fsSL https://deno.land/x/install/install.sh | sh
-fish_add_path $HOME/.deno/bin
-echo "----------"
-echo "Installing PM2 ..."
-yarn global add pm2
-echo "----------"
-echo "Installing missing packages for compiling Ruby ..."
-sudo apt install -y build-essential libssl-dev libreadline-dev zlib1g-dev libtool libyaml-dev
-echo "----------"
-echo "Installing Postgres ..."
-sudo apt install -y postgresql postgresql-contrib libpq-dev
-echo "----------"
-echo "Installing Rbenv ..."
-git clone https://github.com/rbenv/rbenv.git ~/.rbenv
-# Gotcha: normally we would use fish_add_path, but this does not work for the shims...
-set -Ux fish_user_paths $HOME/.rbenv/bin $fish_user_paths
-set -Ux fish_user_paths $HOME/.rbenv/shims $fish_user_paths
-echo "----------"
-echo "Installing Rbenv plugins ..."
-mkdir ~/.rbenv/plugins
-cd ~/.rbenv/plugins
-git clone https://github.com/rbenv/ruby-build.git
-git clone https://github.com/rbenv/rbenv-vars.git
 echo "----------"
 echo "Create directories for projects"
 sudo mkdir -p /var/www/
@@ -73,7 +28,7 @@ echo "Start nginx"
 sudo systemctl start nginx
 echo "----------"
 echo "Sanity check nginx status"
-sudo systemctl status nginx
+sudo systemctl status nginx --no-pager
 echo "----------"
 echo "Hush the welcome message"
 sudo touch ~/.hushlogin

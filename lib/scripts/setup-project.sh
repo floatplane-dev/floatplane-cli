@@ -4,6 +4,28 @@ set -eou pipefail
 
 echo "Setting up project 🌱"
 echo "----------"
+echo "On which server? 🚀"
+echo "Enter the SSH alias (e.g. melbourne, amsterdam, ...)"
+read server
+
+# ssh_aliases=(`grep "^Host " ~/.ssh/config | awk '{print $2}' | sort -u`)
+# select ssh_alias in "${ssh_aliases[@]}"; do
+#   [ "$ssh_alias" ] && break
+#   echo "Please enter a number from the list."
+# done
+# 
+# HAS ODD BUG
+# ----------
+# 1) setup-deno.sh	   9) setup-server-1.sh	    17) frankfurt
+# 2) setup-ember.sh	  10) setup-server-2.sh	    18) github.com
+# 3) setup-github.sh	  11) setup-server-3.sh	    19) madrid
+# 4) setup-gulp.sh	  12) setup-server-4.sh	    20) melbourne
+# 5) setup-logrotation.sh	  13) setup-server-5.sh	    21) mexico
+# 6) setup-nginx.sh	  14) setup-server.sh	    22) osaka
+# 7) setup-project.sh	  15) setup.sh		    23) paris
+# 8) setup-rails.sh	  16) amsterdam
+
+echo "----------"
 echo "What kind of project?"
 
 options[0]="Ember 🐹"
@@ -13,19 +35,6 @@ options[3]="Gulp 🍹"
 select tech in "${options[@]}"
 do
   if [[ "${options[*]}" =~ "${tech}" ]]; then
-    break
-  else
-    echo "Please enter a number from the list."
-  fi
-done
-echo "----------"
-echo "On which server? 🚀"
-
-# Here we grab all the private SSH keys from ~/.ssh which start with admin@ (assuming these are all servers set up with FP CLI)
-servers=(`find ~/.ssh -type f -name "admin@*" -not -name "*.pub" -exec basename {} \; | sort -r`)
-select server in ${servers[@]}
-do
-  if [[ "${servers[*]}" =~ "${server}" ]]; then
     break
   else
     echo "Please enter a number from the list."

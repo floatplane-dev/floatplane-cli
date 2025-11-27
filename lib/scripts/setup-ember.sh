@@ -10,6 +10,27 @@ echo "----------"
 echo "Changing directory ..."
 cd /var/www/$domain
 
+# TODO: REVIEW
+# echo "----------"
+# echo "Installing omf package for NVM ..."
+# omf install nvm
+# echo "----------"
+# echo "Installing NVM ..."
+# curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+# echo "----------"
+# echo "Installing the latest Node LTS version ..."
+# nvm install --lts
+# echo "----------"
+# echo "Setting the latest Node LTS version as default ..."
+# nvm use --lts
+# echo "----------"
+# echo "Installing Yarn ..."
+# curl -o- -L https://yarnpkg.com/install.sh | bash
+# echo "----------"
+# echo "Installing PNPM ..."
+# curl -fsSL https://get.pnpm.io/install.sh | sh -
+# source /home/admin/.config/fish/config.fish
+
 # SET UP SECRETS
 
 if [ -f ".env.example" ]; then

@@ -9,6 +9,13 @@ echo "Setting up Deno 🦕"
 echo "----------"
 echo "Changing directory ..."
 cd /var/www/$domain
+echo "----------"
+echo "Installing Deno ..."
+curl -fsSL https://deno.land/x/install/install.sh | sh
+fish_add_path $HOME/.deno/bin
+echo "----------"
+echo "Installing PM2 ..."
+yarn global add pm2
 
 # SET UP SECRETS
 

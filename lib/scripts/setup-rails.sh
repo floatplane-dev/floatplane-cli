@@ -11,23 +11,49 @@ echo "Changing directory ..."
 cd /var/www/$domain
 echo "----------"
 
+# POSTGRESS
+
+echo "----------"
+echo "Installing Postgres ..."
+sudo apt install -y postgresql postgresql-contrib libpq-dev
+
+# POSTGRESS USER
+
+if sudo -u postgres psql -t -c '\du' | cut -d \| -f 1 | grep -qw admin; then
+  echo "----------"
+  echo "Skipping Postgres user setup"
+else
+  echo "----------"
+  echo "Creating Postgres user named \"admin\"..."
+  sudo -u postgres createuser -s admin
+  echo "----------"
+  echo "Please enter a secure password for this user and store in password manager:"
+  read -s postgres_admin_password
+  sudo -u postgres psql -c "ALTER USER admin WITH PASSWORD '$postgres_admin_password';"
+fi
+
 # RBENV
 
-# should already have been installed during server setup
+echo "Installing missing packages for compiling Ruby ..."
+sudo apt install -y build-essential libssl-dev libreadline-dev zlib1g-dev libtool libyaml-dev
+echo "----------"
+echo "Installing Rbenv ..."
+git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+# Gotcha: normally we would use fish_add_path, but this does not work for the shims...
+set -Ux fish_user_paths $HOME/.rbenv/bin $fish_user_paths
+set -Ux fish_user_paths $HOME/.rbenv/shims $fish_user_paths
+echo "----------"
+echo "Installing Rbenv plugins ..."
+mkdir ~/.rbenv/plugins
+cd ~/.rbenv/plugins
+git clone https://github.com/rbenv/ruby-build.git
+git clone https://github.com/rbenv/rbenv-vars.git
 
 # RUBY
 
 echo "----------"
 echo "Installing Ruby ..."
-rubyversion=$(cat .ruby-version)
-echo $rubyversion
-rbenv install $rubyversion --skip-existing
-# Works on Mac, but not on Debian
-# rbenv install --skip-existing
-
-# Set this version as the default
-# rbenv local $rubyversion
-# TODO: no longer needed?
+rbenv install
 
 # BUNDLER
 
@@ -47,25 +73,6 @@ gem install bundler -v $bundlerversion
 echo "----------"
 echo "Installing gems ..."
 bundle install
-
-# POSTGRESS
-
-# Postgress should already have been installed during server setup.
-
-# POSTGRESS USER
-
-if sudo -u postgres psql -t -c '\du' | cut -d \| -f 1 | grep -qw admin; then
-  echo "----------"
-  echo "Skipping Postgres user setup"
-else
-  echo "----------"
-  echo "Creating Postgres user named \"admin\"..."
-  sudo -u postgres createuser -s admin
-  echo "----------"
-  echo "Please enter a secure password for this user and store in password manager:"
-  read -s postgres_admin_password
-  sudo -u postgres psql -c "ALTER USER admin WITH PASSWORD '$postgres_admin_password';"
-fi
 
 # SET UP SECRETS
 
