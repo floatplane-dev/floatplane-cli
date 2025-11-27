@@ -57,13 +57,13 @@ ssh root@$domain "/setup-server-1.sh"
 echo "----------"
 echo "Uploading $pub to server..."
 # Note: the -f is necessary when there is no private key adjacent to the .pub (we use 1Password)
-ssh-copy-id -f -i $ssh_pub_path admin@$domain
+ssh-copy-id -f -i $ssh_pub_path $alias
 echo "----------"
 echo "Uploading part 2..."
-scp ./setup-server-2.sh admin@$domain:~/
+scp ./setup-server-2.sh $alias:~/
 echo "----------"
 echo "Running part 2..."
-ssh -t admin@$domain "~/setup-server-2.sh"
+ssh -t $alias "~/setup-server-2.sh"
 echo "----------"
 echo "Testing if root can still access server..."
 echo "Enter the password of the root user 3 times:"
@@ -78,22 +78,22 @@ else
 fi
 echo "----------"
 echo "Uploading part 3..."
-scp ./setup-server-3.sh admin@$domain:~/
+scp ./setup-server-3.sh $alias:~/
 echo "----------"
 echo "Running part 3..."
-ssh -t admin@$domain "~/setup-server-3.sh"
+ssh -t $alias "~/setup-server-3.sh"
 echo "----------"
 echo "Uploading part 4..."
-scp ./setup-server-4.sh admin@$domain:~/
+scp ./setup-server-4.sh $alias:~/
 echo "----------"
 echo "Running part 4..."
-ssh -t admin@$domain "~/setup-server-4.sh"
+ssh -t $alias "~/setup-server-4.sh"
 echo "----------"
 echo "Uploading part 5..."
-scp ./setup-server-5.sh admin@$domain:~/
+scp ./setup-server-5.sh $alias:~/
 echo "----------"
 echo "Running part 5..."
-ssh -t admin@$domain "~/setup-server-5.sh"
+ssh -t $alias "~/setup-server-5.sh"
 echo "----------"
 echo "Server setup complete 🗿"
 echo "----------"
