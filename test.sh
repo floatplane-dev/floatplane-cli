@@ -2,6 +2,21 @@
 
 domain=admin.interflux.com
 
+ask_yes_no() {
+    while true; do
+    select answer in yes no; do
+        case $answer in
+        yes) break 2;;
+        no)  echo "Please do so now";;
+        *)   echo "Invalid choice";;
+        esac
+    done
+    done
+}
+
+echo "Have you done all of the below? 🥦"
+ask_yes_no
+
 echo "----------"
 echo "Done!"
 echo "----------"
