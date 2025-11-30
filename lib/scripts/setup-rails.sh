@@ -64,6 +64,33 @@ git config --global --add safe.directory /var/www/$domain
 
 echo "✅ Done"
 
+# POSTGRES
+
+echo "----------"
+echo "Installing Postgres ..."
+sudo apt install -y postgresql postgresql-contrib libpq-dev
+echo "✅ Done"
+
+# POSTGRES USER
+
+echo "----------"
+echo "Installing Postgres user ..."
+if sudo -u postgres psql -t -c '\du' | cut -d \| -f 1 | grep -qw $deploy; then
+  echo "----------"
+  echo "Skipping Postgres user setup"
+else
+  echo "----------"
+  echo "Creating Postgres user named \"$deploy\" ..."
+  sudo -u postgres createuser -s $deploy
+  echo "----------"
+  echo "Enter Postgres user password:"
+  echo "👉🏼 Store this in 1Password"
+  echo "👉🏼 Store this in config/credentials/production.yml.enc"
+  read -s db_pass
+  sudo -u postgres psql -c "ALTER USER $deploy WITH PASSWORD '$db_pass';"
+fi
+echo "✅ Done"
+
 # RBENV
 
 echo "----------"
@@ -110,7 +137,7 @@ echo "Installing Ruby for deploy user ..."
 rubyversion=$(cat .ruby-version)
 echo $rubyversion
 # On Mac you can simply run `rbenv install`. On Debian we must specify the exact version.
-sudo -u $deploy bash -lc 'rbenv install $rubyversion --skip-existing'
+sudo -u $deploy bash -lc "rbenv install $rubyversion --skip-existing"
 echo "✅ Done"
 
 # echo "----------"
@@ -122,23 +149,20 @@ echo "✅ Done"
 # https://bundler.io/blog/2022/01/23/bundler-v2-3.html
 # https://bundler.io/blog/2019/05/14/solutions-for-cant-find-gem-bundler-with-executable-bundle.html
 # Until Bundler 2.3 we need to install the exact version ourselves.
-# gem install bundler:2.4.6
 
-bundlerversion=$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)
-echo $bundlerversion
 echo "----------"
-echo "Installing Bundler for deploy user ..."
-sudo -u $deploy bash -lc 'gem install bundler -v $bundlerversion'
+echo "Installing Bundler v$bundlerversion for deploy user ..."
+sudo -u $deploy bash -lc "gem install bundler -v \"$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)\""
 
 # echo "----------"
 # echo "Installing Bundler for admin user ..."
-# gem install bundler -v $bundlerversion
+# gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
 
 # GEMS
 
 echo "----------"
 echo "Installing gems for deploy user ..."
-sudo -u $deploy bash -lc 'bundle install'
+sudo -u $deploy bash -lc "bundle install"
 echo "✅ Done"
 
 # echo "----------"
@@ -168,45 +192,18 @@ echo "Setting RAILS_ENV=production on rbenv-vars"
 echo "RAILS_ENV=production" >> .rbenv-vars
 echo "✅ Done"
 
-# POSTGRES
-
-echo "----------"
-echo "Installing Postgres ..."
-sudo apt install -y postgresql postgresql-contrib libpq-dev
-echo "✅ Done"
-
-# POSTGRES USER
-
-echo "----------"
-echo "Installing Postgres user ..."
-if sudo -u postgres psql -t -c '\du' | cut -d \| -f 1 | grep -qw $deploy; then
-  echo "----------"
-  echo "Skipping Postgres user setup"
-else
-  echo "----------"
-  echo "Creating Postgres user named \"$deploy\" ..."
-  sudo -u postgres createuser -s $deploy
-  echo "----------"
-  echo "Enter Postgres user password:"
-  echo "👉🏼 Store this in 1Password"
-  echo "👉🏼 Store this in config/credentials/production.yml.enc"
-  read -s db_pass
-  sudo -u postgres psql -c "ALTER USER $deploy WITH PASSWORD '$db_pass';"
-fi
-echo "✅ Done"
-
 # CREATE DATABASE
 
 echo "----------"
 echo "Creating database ..."
-sudo -u $deploy bash -lc 'bin/rails db:create'
+sudo -u $deploy bash -lc "bin/rails db:create"
 echo "✅ Done"
 
 # DATABASE SCHEMA
 
 echo "----------"
 echo "Apply database schema..."
-sudo -u $deploy bash -lc 'bin/rails db:schema:load'
+sudo -u $deploy bash -lc "bin/rails db:schema:load"
 echo "✅ Done"
 
 # PUMA
@@ -219,5 +216,6 @@ echo "✅ Done"
 
 echo "----------"
 echo "Starting Puma service"
-sudo service $deploy start
+sudo systemctl start $deploy
+sudo systemctl status $deploy --no-pager
 echo "✅ Done"

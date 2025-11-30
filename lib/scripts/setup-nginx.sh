@@ -11,17 +11,17 @@ echo "Have you done all of the below? 🥦"
 echo "👉🏼 The A and AAAA records of $domain are pointing at the IP of server $server."
 echo "👉🏼 The code base has nginx/$domain.conf for HTTPS setup."
 echo "👉🏼 The code base has a protected branch called production."
-yesno=(yes no)
-select answer in ${yesno[@]}
-do
-  if [ "$answer" == "yes" ]; then
-    break
-  elif [ "$answer" == "no" ]; then
-    echo "Please do so now."
-  else
-    echo "Please enter a number from the list."
-  fi
+
+while true; do
+  select answer in yes no; do
+    case $answer in
+      yes) exit 0;;
+      no)  echo "Please do so now";;
+      *)   echo "Invalid choice"; continue 2
+    esac
+  done
 done
+
 echo "----------"
 echo "Does www.$domain need to redirect to $domain? 🪃  (true/false)"
 boolean=(true false)
@@ -33,18 +33,18 @@ do
     echo "Please enter a number from the list."
   fi
 done
+
 if [ "$redirect_www" = true ] ; then
   echo "----------"
   echo "Are the A and AAAA records of www.$domain also pointing at the IP of server $server? 🍉"
-  select answer in ${yesno[@]}
-  do
-    if [ "$answer" == "yes" ]; then
-      break
-    elif [ "$answer" == "no" ]; then
-      echo "Please do so now."
-    else
-      echo "Please enter a number from the list."
-    fi
+  while true; do
+    select answer in yes no; do
+      case $answer in
+        yes) exit 0;;
+        no)  echo "Please do so now";;
+        *)   echo "Invalid choice"; continue 2
+      esac
+    done
   done
 fi
 

@@ -98,25 +98,16 @@ if [[ $tech == "Rails 🛤️" ]]; then
   echo "✅ nginx/$domain.conf"
   echo "✅ GET /api/sanity-check"
 
-  while select ans in yes no; do
-    case $ans in
-      yes) break 2 ;;
-      no)  echo "Update codebase and git push to production branch" ;;
-      *)   echo "Select number from list" ;;
-    esac
+  while true; do
+    select ans in yes no; do
+      case $ans in
+        yes) break 2 ;;
+        no)  echo "Update codebase and git push to production branch" ;;
+        *)   echo "Select number from list" ;;
+      esac
+    done
   done
 
-  yesno=(yes no)
-  select answer in ${yesno[@]}
-  do
-    if [ "$answer" == "yes" ]; then
-      break
-    elif [ "$answer" == "no" ]; then
-      echo "Please do so now and git push."
-    else
-      echo "Please enter a number from the list."
-    fi
-  done
   scp ./setup-github.sh $server:~/
   ssh -t $server "~/setup-github.sh $domain"
   scp ./setup-rails.sh $server:~/
