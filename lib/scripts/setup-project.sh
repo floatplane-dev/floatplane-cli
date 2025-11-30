@@ -88,11 +88,24 @@ if [[ $tech == "Deno 🦕" ]]; then
 fi
 
 if [[ $tech == "Rails 🛤️" ]]; then
+
+  # PREREQUISITES
+
   echo "Does your Rails codebase meet these criteria?"
-  echo "✅ It has .ruby-version"
-  echo "✅ It has .rbenv-vars.example"
-  echo "✅ It has config/credentials.yml.enc"
-  echo "✅ It does not have config/master.key"
+  echo "✅ .ruby-version"
+  echo "✅ config/credentials/production.yml.enc"
+  echo "✅ config/puma.service"
+  echo "✅ nginx/$domain.conf"
+  echo "✅ GET /api/sanity-check"
+
+  while select ans in yes no; do
+    case $ans in
+      yes) break 2 ;;
+      no)  echo "Update codebase and git push to production branch" ;;
+      *)   echo "Select number from list" ;;
+    esac
+  done
+
   yesno=(yes no)
   select answer in ${yesno[@]}
   do
