@@ -10,6 +10,7 @@ echo "Setting up Rails 🛤️ ..."
 echo "----------"
 echo "Changing directory ..."
 cd /var/www/$domain
+echo "✅ Done"
 
 # POSTGRES
 
@@ -21,21 +22,15 @@ echo "✅ Done"
 # POSTGRES USER
 
 echo "----------"
-echo "Installing Postgres user ..."
-if sudo -u postgres psql -t -c '\du' | cut -d \| -f 1 | grep -qw $deploy; then
-  echo "----------"
-  echo "Skipping Postgres user setup"
-else
-  echo "----------"
-  echo "Creating Postgres user named \"$deploy\" ..."
-  sudo -u postgres createuser -s $deploy
-  echo "----------"
-  echo "Enter Postgres user password:"
-  echo "👉🏼 Store this in 1Password"
-  echo "👉🏼 Store this in config/credentials/production.yml.enc"
-  read -s db_pass
-  sudo -u postgres psql -c "ALTER USER $deploy WITH PASSWORD '$db_pass';"
-fi
+echo "Creating Postgres user named \"$deploy\" ..."
+sudo -u postgres createuser -s $deploy
+echo "✅ Done"
+echo "----------"
+echo "Enter Postgres user password:"
+echo "👉🏼 Store this in 1Password"
+echo "👉🏼 Store this in config/credentials/production.yml.enc"
+read -s db_pass
+sudo -u postgres psql -c "ALTER USER $deploy WITH PASSWORD '$db_pass';"
 echo "✅ Done"
 
 # RBENV
@@ -48,11 +43,10 @@ echo "✅ Done"
 echo "----------"
 echo "Installing rbenv for deploy user ..."
 sudo -u $deploy git clone https://github.com/rbenv/rbenv.git /home/$deploy/.rbenv
-echo "✅ Done"
-
 # We should run `rbenv init`, but fails.
 # Instead we add manually what `rbenv init` would have done.
 sudo -u piccolo bash -c 'echo "eval \"\$(~/.rbenv/bin/rbenv init - --no-rehash bash)\"" > /home/piccolo/.bash_profile'
+echo "✅ Done"
 
 # echo "----------"
 # echo "Installing rbenv for admin user ..."
@@ -100,6 +94,7 @@ echo "✅ Done"
 echo "----------"
 echo "Installing Bundler v$bundlerversion for deploy user ..."
 sudo -u $deploy bash -lc "gem install bundler -v \"$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)\""
+echo "✅ Done"
 
 # echo "----------"
 # echo "Installing Bundler for admin user ..."
