@@ -112,18 +112,25 @@ if [[ $tech == "Rails 🛤️" ]]; then
 
   wait_until_yes
 
+  # DEPLOY USER
+
+  # IMPORTANT: Why bother with a deploy user? 
+  # Running Puma with the admin user, which has sudo powers, allows Rails to run commands as admin.
+  # This is considered bad practice. Instead we ought to create a "deploy" user which has only the
+  # few privileges needed for Puma to run the Rails app via systemd.
+
   echo "----------"
   echo "Choose short name for deploy user (e.g.: interflux, piccolo, ...):"
   read deploy
+  sudo adduser --system --group --home /home/$deploy --shell /bin/bash $deploy
+  echo "✅ done"
   echo "----------"
-  scp ./setup-deploy-user.sh $server:~/
-  ssh -t $server "~/setup-deploy-user.sh $domain $deploy"
   scp ./setup-logs.sh $server:~/
   ssh -t $server "~/setup-logs.sh $domain $deploy"
   scp ./setup-github.sh $server:~/
   ssh -t $server "~/setup-github.sh $domain $deploy"
   scp ./setup-rails.sh $server:~/
-  ssh -t $server "~/setup-rails.sh $domain"
+  ssh -t $server "~/setup-rails.sh $domain $deploy"
   scp ./setup-nginx.sh $server:~/
   ssh -t $server "~/setup-nginx.sh $domain"
   echo "----------"
@@ -167,6 +174,7 @@ fi
 # sudo rm -rf /home/$deploy/.ssh/
 # remove deploy user and group entirely
 # remove nginx domain name certs
+# remove postgress databases and user
 
 echo "----------"
 echo "Project setup complete 🌱"
