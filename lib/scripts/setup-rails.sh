@@ -3,74 +3,13 @@
 set -e
 
 domain=$1
+deploy=$2
 
 echo "----------"
 echo "Setting up Rails 🛤️ ..."
 echo "----------"
 echo "Changing directory ..."
 cd /var/www/$domain
-
-# DEPLOY USER
-
-# IMPORTANT: 
-# Why bother with a deploy user? 
-# Running Puma with the admin user, which has sudo powers, allows Rails to run commands as admin.
-# This is considered bad practice. Instead we ought to create a "deploy" user which has only the
-# few privileges needed for Puma to run the Rails app via systemd.
-
-echo "----------"
-echo "Choose short name for deploy user (e.g.: interflux, piccolo, ...):"
-read deploy
-
-echo "----------"
-echo "Creating deploy user ..."
-
-# Create a system user
-sudo adduser --system --group --home /home/$deploy --shell /bin/bash $deploy
-
-# Make the system user owner of the project root (needed for Puma)
-sudo chown -R $deploy:$deploy /var/www/$domain/
-sudo chown -R $deploy:$deploy /var/log/$domain/
-
-# Use ACL to grant admin rwx permissions across project
-sudo setfacl -R -m u:admin:rwx /var/www/$domain/
-sudo setfacl -R -m u:admin:rwx /var/log/$domain/
-sudo setfacl -R -d -m u:admin:rwx /var/www/$domain/
-sudo setfacl -R -d -m u:admin:rwx /var/log/$domain/
-getfacl /var/www/$domain/
-getfacl /var/log/$domain/
-
-# Prevent git from throwing a warning regarding dubious ownership
-git config --global --add safe.directory /var/www/$domain
-
-echo "✅ Done"
-
-# LOGS
-
-# Rails, Puma, Nginx and Bullet should log to /var/log and not log/ in Rails root.
-
-# Create directory for logging to
-sudo mkdir /var/log/$domain
-
-# Make the deploy user owner of the logs
-sudo chown -R $deploy:$deploy /var/log/$domain
-sudo chmod 775 /var/log/$domain
-
-# Allow Nginx to also write to this directory
-sudo usermod -aG $deploy www-data
-sudo systemctl restart nginx
-
-# Never keeps logs older than 7 days
-sudo tee /etc/logrotate.d/api.piccolo.floatplane.dev > /dev/null <<EOF
-/var/log/api.piccolo.floatplane.dev/*.log {
-    daily
-    rotate 7
-    compress
-    missingok
-    notifempty
-    copytruncate
-}
-EOF
 
 # POSTGRES
 
