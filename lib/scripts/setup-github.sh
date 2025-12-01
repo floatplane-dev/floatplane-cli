@@ -59,6 +59,12 @@ echo "Make deploy user owner of project root ..."
 sudo chown -R $deploy:$deploy /var/www/$domain
 echo "✅ done"
 echo "----------"
+echo "Grant admin access to project ..."
+sudo setfacl -R -m u:admin:rwx /var/www/$domain/
+sudo setfacl -R -d -m u:admin:rwx /var/www/$domain/
+sudo getfacl /var/www/$domain/
+echo "✅ done"
+echo "----------"
 echo "Pulling latest production code ..."
 sudo -u $deploy bash -lc 'git fetch'
 echo "✅ done"
