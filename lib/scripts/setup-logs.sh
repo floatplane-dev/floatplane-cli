@@ -16,7 +16,12 @@ sudo mkdir /var/log/$domain
 sudo chown -R $deploy:$deploy /var/log/$domain
 sudo chmod 775 /var/log/$domain
 
-# Allow Nginx to also write to this directory
+# Grant admin access to the logs
+sudo setfacl -R -m u:admin:rwx /var/log/$domain/
+sudo setfacl -R -d -m u:admin:rwx /var/log/$domain/
+sudo getfacl /var/log/$domain/
+
+# Allow Nginx to also write logs
 sudo usermod -aG $deploy www-data
 sudo systemctl restart nginx
 
