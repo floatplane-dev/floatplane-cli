@@ -67,6 +67,3 @@ echo "Checking out production ..."
 sudo -u $deploy bash -lc 'git checkout production'
 echo "✅ done"
 echo "----------"
-# echo "Setting upstream out production ..."
-# sudo -u $deploy bash -lc 'git branch --set-upstream-to=origin/production production'
-# echo "✅ done"
