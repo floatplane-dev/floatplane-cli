@@ -2,6 +2,18 @@
 
 set -eou pipefail
 
+wait_until_yes() {
+    while true; do
+    select answer in yes no; do
+        case $answer in
+        yes) break 2;;
+        no)  echo "Please do so now";;
+        *)   echo "Invalid choice";;
+        esac
+    done
+    done
+}
+
 echo "Setting up project 🌱"
 echo "----------"
 echo "On which server? 🚀"
@@ -91,22 +103,14 @@ if [[ $tech == "Rails 🛤️" ]]; then
 
   # PREREQUISITES
 
-  echo "Does your Rails codebase meet these criteria?"
+  echo "Does the production branch of your Rails codebase meet these criteria?"
   echo "✅ .ruby-version"
   echo "✅ config/credentials/production.yml.enc"
   echo "✅ config/puma.service"
   echo "✅ nginx/$domain.conf"
   echo "✅ GET /api/sanity-check"
 
-  while true; do
-    select ans in yes no; do
-      case $ans in
-        yes) break 2 ;;
-        no)  echo "Update codebase and git push to production branch" ;;
-        *)   echo "Select number from list" ;;
-      esac
-    done
-  done
+  wait_until_yes
 
   scp ./setup-github.sh $server:~/
   ssh -t $server "~/setup-github.sh $domain"

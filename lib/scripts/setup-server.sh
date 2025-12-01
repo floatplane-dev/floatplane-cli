@@ -3,6 +3,18 @@
 set -e
 set -o pipefail
 
+wait_until_yes() {
+    while true; do
+    select answer in yes no; do
+        case $answer in
+        yes) break 2;;
+        no)  echo "Please do so now";;
+        *)   echo "Invalid choice";;
+        esac
+    done
+    done
+}
+
 echo "Setting up server 🗿"
 echo "----------"
 echo "Have you done the following?"
@@ -13,12 +25,7 @@ echo "    ↳ frankfurt-server-interflux-com"
 echo "👉🏼 Created A and AAAA pointing to that server with identical name patterns:"
 echo "    ↳ sydney.server.floatplane.dev"
 echo "    ↳ frankfurt.server.interflux.com"
-options=("yes" "no")
-select option in "${options[@]}"; do
-  [ "$option" ] && break
-  echo "Please enter a number from the list."
-done
-[ "$option" == "no" ] && exit 0
+wait_until_yes
 echo "----------"
 echo "Enter the domain name (e.g. sydney.server.floatplane.dev):"
 read domain

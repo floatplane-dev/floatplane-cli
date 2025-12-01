@@ -4,6 +4,18 @@ set -e
 
 domain=$1
 
+wait_until_yes() {
+    while true; do
+    select answer in yes no; do
+        case $answer in
+        yes) break 2;;
+        no)  echo "Please do so now";;
+        *)   echo "Invalid choice";;
+        esac
+    done
+    done
+}
+
 echo "----------"
 echo "Setting up Nginx..."
 echo "----------"
@@ -12,15 +24,7 @@ echo "👉🏼 The A and AAAA records of $domain are pointing at the IP of serve
 echo "👉🏼 The code base has nginx/$domain.conf for HTTPS setup."
 echo "👉🏼 The code base has a protected branch called production."
 
-while true; do
-  select answer in yes no; do
-    case $answer in
-      yes) exit 0;;
-      no)  echo "Please do so now";;
-      *)   echo "Invalid choice"; continue 2
-    esac
-  done
-done
+wait_until_yes
 
 echo "----------"
 echo "Does www.$domain need to redirect to $domain? 🪃  (true/false)"
@@ -37,15 +41,7 @@ done
 if [ "$redirect_www" = true ] ; then
   echo "----------"
   echo "Are the A and AAAA records of www.$domain also pointing at the IP of server $server? 🍉"
-  while true; do
-    select answer in yes no; do
-      case $answer in
-        yes) exit 0;;
-        no)  echo "Please do so now";;
-        *)   echo "Invalid choice"; continue 2
-      esac
-    done
-  done
+  wait_until_yes
 fi
 
 # NGINX, CERTBOT, HTTPS CERTIFICATES

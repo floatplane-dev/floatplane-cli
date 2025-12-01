@@ -4,6 +4,18 @@ set -eou pipefail
 
 domain=$1
 
+wait_until_yes() {
+    while true; do
+    select answer in yes no; do
+        case $answer in
+        yes) break 2;;
+        no)  echo "Please do so now";;
+        *)   echo "Invalid choice";;
+        esac
+    done
+    done
+}
+
 echo "----------"
 echo "Setting up Github code repository 🦑"
 
@@ -19,17 +31,7 @@ if [ ! -f ~/.ssh/readonly@$domain ]; then
   echo "2. Open Github and go to the repository of $domain."
   echo "3. Add public key as read-only deploy key."
   echo "4. Done?"
-  yesno=(yes no)
-  select answer in ${yesno[@]}
-  do
-    if [ "$answer" == "yes" ]; then
-      break
-    elif [ "$answer" == "no" ]; then
-      echo "Please do so now."
-    else
-      echo "Please enter a number from the list."
-    fi
-  done
+  wait_until_yes
 fi
 
 # Clone the repo, if it does not yet exist
