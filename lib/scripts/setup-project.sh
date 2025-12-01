@@ -103,7 +103,7 @@ if [[ $tech == "Rails 🛤️" ]]; then
 
   # PREREQUISITES
 
-  echo "Does the production branch of your Rails codebase meet these criteria?"
+  echo "Does the production branch of your Rails codebase have all of these?"
   echo "✅ .ruby-version"
   echo "✅ config/credentials/production.yml.enc"
   echo "✅ config/puma.service"
@@ -112,8 +112,16 @@ if [[ $tech == "Rails 🛤️" ]]; then
 
   wait_until_yes
 
+  echo "----------"
+  echo "Choose short name for deploy user (e.g.: interflux, piccolo, ...):"
+  read deploy
+  echo "----------"
+  scp ./setup-deploy-user.sh $server:~/
+  ssh -t $server "~/setup-deploy-user.sh $domain $deploy"
+  scp ./setup-logs.sh $server:~/
+  ssh -t $server "~/setup-logs.sh $domain $deploy"
   scp ./setup-github.sh $server:~/
-  ssh -t $server "~/setup-github.sh $domain"
+  ssh -t $server "~/setup-github.sh $domain $deploy"
   scp ./setup-rails.sh $server:~/
   ssh -t $server "~/setup-rails.sh $domain"
   scp ./setup-nginx.sh $server:~/
@@ -150,6 +158,15 @@ if [[ $tech == "Gulp 🍹" ]]; then
   open https://$domain
   echo "----------"
 fi
+
+# TODO: reset / wipe project
+# rm nginx symbolic link
+# rm systemd symbolic link
+# sudo rm -rf /var/www/$domain/
+# sudo rm -rf /var/log/$domain/
+# sudo rm -rf /home/$deploy/.ssh/
+# remove deploy user and group entirely
+# remove nginx domain name certs
 
 echo "----------"
 echo "Project setup complete 🌱"
