@@ -29,11 +29,13 @@ if [ -f ".env.example" ] && [ ! -f ".env.production" ]; then
   echo $(cat .env.example)
   echo "----------"
   read env_vars
+  echo "----------"
   echo $env_vars > .env.production
   sudo chown $deploy:$deploy .env.production
   echo "----------"
   echo "✅ .env.production created"
   echo "----------"
+
 else
   echo "----------"
   echo "✅ .env.production already exists"
@@ -43,19 +45,19 @@ fi
 # BUILD
 
 echo "git pull"
-sudo -u $deploy bash -lc 'cd /var/www/$domain; git pull'
+sudo -u $deploy bash -lc "cd /var/www/$domain; git pull"
 echo "✅ Done"
 echo "----------"
 echo "nvm install"
-sudo -u $deploy bash -lc 'cd /var/www/$domain; nvm install'
+sudo -u $deploy bash -lc "cd /var/www/$domain; nvm install"
 echo "✅ Done"
 echo "----------"
 echo "npm install"
-sudo -u $deploy bash -lc 'cd /var/www/$domain; npm install'
+sudo -u $deploy bash -lc "cd /var/www/$domain; npm install"
 echo "✅ Done"
 echo "----------"
 echo "npm run build"
-sudo -u $deploy bash -lc 'cd /var/www/$domain; npm run build'
+sudo -u $deploy bash -lc "cd /var/www/$domain; npm run build"
 echo "✅ Done"
 echo "----------"
 
