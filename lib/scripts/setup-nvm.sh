@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -e
+
+deploy=$1
+
+if [ -f ~/.bash_profile ]; then
+    echo "~/.bash_profile already exists"
+    ls -l ~/.bash_profile
+else
+    echo "----------"
+    echo "Creating .bash_profile ..."
+    touch ~/.bash_profile
+    echo "----------"
+    echo "✅ Created .bash_profile"
+    echo "----------"
+fi
+
+# Note: `which nvm` returns nothing because NVM is not an executable binary.
+# It's a shell function defined in ~/.nvm/nvm.sh.
+
+if command -v nvm >/dev/null 2>&1; then
+    echo "----------"
+    echo "✅ NVM is already installed"
+    echo "----------"
+else
+    echo "----------"
+    echo "Installing NVM ..."
+    echo "----------"
+    sudo -u $deploy bash -lc 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash'
+    echo "----------"
+    echo "✅ Done installing NVM"
+    echo "----------"
+fi
