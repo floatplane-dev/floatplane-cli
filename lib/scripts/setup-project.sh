@@ -3,15 +3,15 @@
 set -eou pipefail
 
 wait_until_yes() {
-    while true; do
-    select answer in yes no; do
-        case $answer in
-        yes) break 2;;
-        no)  echo "Please do so now";;
-        *)   echo "Invalid choice";;
-        esac
-    done
-    done
+  while true; do
+  select answer in yes no; do
+      case $answer in
+      yes) break 2;;
+      no)  echo "Please do so now";;
+      *)   echo "Invalid choice";;
+      esac
+  done
+  done
 }
 
 echo "Setting up project 🌱"
@@ -30,7 +30,7 @@ read server
 # ----------
 # 1) setup-deno.sh	   9) setup-server-1.sh	    17) frankfurt
 # 2) setup-ember.sh	  10) setup-server-2.sh	    18) github.com
-# 3) setup-github.sh	  11) setup-server-3.sh	    19) madrid
+# 3) setup-git-repo.sh	  11) setup-server-3.sh	    19) madrid
 # 4) setup-gulp.sh	  12) setup-server-4.sh	    20) melbourne
 # 5) setup-logrotation.sh	  13) setup-server-5.sh	    21) mexico
 # 6) setup-nginx.sh	  14) setup-server.sh	    22) osaka
@@ -40,10 +40,11 @@ read server
 echo "----------"
 echo "What kind of project?"
 
-options[0]="Ember 🐹"
-options[1]="Deno 🦕"
-options[2]="Rails 🛤️"
-options[3]="Gulp 🍹"
+options[0]="Rails 🛤️"
+options[1]="Svelte Kit ⚡️"
+# options[2]="Ember 🐹"
+# options[3]="Deno 🦕"
+# options[4]="Gulp 🍹"
 select tech in "${options[@]}"
 do
   if [[ "${options[*]}" =~ "${tech}" ]]; then
@@ -60,44 +61,44 @@ echo "----------"
 echo "Connecting to $server ..."
 echo "----------"
 
-if [[ $tech == "Ember 🐹" ]]; then
-  scp ./setup-github.sh $server:~/
-  ssh -t $server "~/setup-github.sh $domain"
-  scp ./setup-ember.sh $server:~/
-  ssh -t $server "~/setup-ember.sh $domain"
-  scp ./setup-nginx.sh $server:~/
-  ssh -t $server "~/setup-nginx.sh $domain"
-  echo "----------"
-  echo "Done!"
-  echo "----------"
-  echo "FINAL STEP:"
-  echo "👉🏼 Open $domain in your browser. Check whether all is working!"
-  sleep 1
-  echo "3"
-  sleep 1
-  echo "2"
-  sleep 1
-  echo "1"
-  sleep 1
-  open https://$domain
-  echo "----------"
-fi
+# if [[ $tech == "Ember 🐹" ]]; then
+#   scp ./setup-git-repo.sh $server:~/
+#   ssh -t $server "~/setup-git-repo.sh $domain"
+#   scp ./setup-ember.sh $server:~/
+#   ssh -t $server "~/setup-ember.sh $domain"
+#   scp ./setup-nginx.sh $server:~/
+#   ssh -t $server "~/setup-nginx.sh $domain"
+#   echo "----------"
+#   echo "Done!"
+#   echo "----------"
+#   echo "FINAL STEP:"
+#   echo "👉🏼 Open $domain in your browser. Check whether all is working!"
+#   sleep 1
+#   echo "3"
+#   sleep 1
+#   echo "2"
+#   sleep 1
+#   echo "1"
+#   sleep 1
+#   open https://$domain
+#   echo "----------"
+# fi
 
-if [[ $tech == "Deno 🦕" ]]; then
-  scp ./setup-github.sh $server:~/
-  ssh -t $server "~/setup-github.sh $domain"
-  scp ./setup-deno.sh $server:~/
-  ssh -t $server "~/setup-deno.sh $domain"
-  scp ./setup-nginx.sh $server:~/
-  ssh -t $server "~/setup-nginx.sh $domain"
-  echo "----------"
-  echo "Done!"
-  echo "----------"
-  echo "Possible next steps:"
-  echo "👉🏼 Check if Deno API is alive with: curl https://$domain/sanity-check"
-  echo "👉🏼 Populate the database"
-  echo "----------"
-fi
+# if [[ $tech == "Deno 🦕" ]]; then
+#   scp ./setup-git-repo.sh $server:~/
+#   ssh -t $server "~/setup-git-repo.sh $domain"
+#   scp ./setup-deno.sh $server:~/
+#   ssh -t $server "~/setup-deno.sh $domain"
+#   scp ./setup-nginx.sh $server:~/
+#   ssh -t $server "~/setup-nginx.sh $domain"
+#   echo "----------"
+#   echo "Done!"
+#   echo "----------"
+#   echo "Possible next steps:"
+#   echo "👉🏼 Check if Deno API is alive with: curl https://$domain/sanity-check"
+#   echo "👉🏼 Populate the database"
+#   echo "----------"
+# fi
 
 if [[ $tech == "Rails 🛤️" ]]; then
 
@@ -125,16 +126,22 @@ if [[ $tech == "Rails 🛤️" ]]; then
   sudo adduser --system --group --home /home/$deploy --shell /bin/bash $deploy
   echo "✅ done"
   echo "----------"
+  scp ./setup-deploy-user.sh $server:~/
+  ssh -t $server "~/setup-deploy-user.sh $deploy"
+
   scp ./setup-logs.sh $server:~/
   ssh -t $server "~/setup-logs.sh $domain $deploy"
-  scp ./setup-github.sh $server:~/
-  ssh -t $server "~/setup-github.sh $domain $deploy"
+
+  scp ./setup-git-repo.sh $server:~/
+  ssh -t $server "~/setup-git-repo.sh $domain $deploy"
+
   scp ./setup-rails.sh $server:~/
   ssh -t $server "~/setup-rails.sh $domain $deploy"
+
   scp ./setup-nginx.sh $server:~/
   ssh -t $server "~/setup-nginx.sh $domain"
   echo "----------"
-  echo "Done!"
+  echo "✅ Done"
   echo "----------"
   echo "NEXT STEPS"
   echo "👉🏼 Hit the API with curl to sanity test if live."
@@ -143,15 +150,41 @@ if [[ $tech == "Rails 🛤️" ]]; then
   echo "----------"
 fi
 
-if [[ $tech == "Gulp 🍹" ]]; then
-  scp ./setup-github.sh $server:~/
-  ssh -t $server "~/setup-github.sh $domain"
-  scp ./setup-gulp.sh $server:~/
-  ssh -t $server "~/setup-gulp.sh $domain"
+if [[ $tech == "Svelte Kit ⚡️" ]]; then
+  echo "✅ Do the DNS records of $domain point to $server server?"
+  wait_until_yes
+
+  echo "Does your codebase have the following?"
+  echo "✅ a production branch"
+  echo "✅ @svelte/adaptor-node"
+  echo "✅ .env.example"
+  echo "✅ systemd.service"
+  echo "✅ nginx/$domain.conf"
+  wait_until_yes
+
+  echo "----------"
+  echo "Name the deploy user:"
+  read deploy
+
+  scp ./setup-deploy-user.sh $server:~/
+  ssh -t $server "~/setup-deploy-user.sh $deploy"
+
+  scp ./setup-logs.sh $server:~/
+  ssh -t $server "~/setup-logs.sh $domain $deploy"
+
+  scp ./setup-git-repo.sh $server:~/
+  ssh -t $server "~/setup-git-repo.sh $domain $deploy"
+
+  scp ./setup-nvm.sh $server:~/
+  ssh -t $server "~/setup-nvm.sh $deploy"
+
+  scp ./setup-svelte.sh $server:~/
+  ssh -t $server "~/setup-svelte.sh $domain $deploy"
+
   scp ./setup-nginx.sh $server:~/
   ssh -t $server "~/setup-nginx.sh $domain"
   echo "----------"
-  echo "Done!"
+  echo "✅ Done"
   echo "----------"
   echo "FINAL STEP:"
   echo "👉🏼 Open $domain in your browser. Check whether all is working!"
@@ -165,6 +198,29 @@ if [[ $tech == "Gulp 🍹" ]]; then
   open https://$domain
   echo "----------"
 fi
+
+# if [[ $tech == "Gulp 🍹" ]]; then
+#   scp ./setup-git-repo.sh $server:~/
+#   ssh -t $server "~/setup-git-repo.sh $domain"
+#   scp ./setup-gulp.sh $server:~/
+#   ssh -t $server "~/setup-gulp.sh $domain"
+#   scp ./setup-nginx.sh $server:~/
+#   ssh -t $server "~/setup-nginx.sh $domain"
+#   echo "----------"
+#   echo "Done!"
+#   echo "----------"
+#   echo "FINAL STEP:"
+#   echo "👉🏼 Open $domain in your browser. Check whether all is working!"
+#   sleep 1
+#   echo "3"
+#   sleep 1
+#   echo "2"
+#   sleep 1
+#   echo "1"
+#   sleep 1
+#   open https://$domain
+#   echo "----------"
+# fi
 
 # TODO: reset / wipe project
 # rm nginx symbolic link
