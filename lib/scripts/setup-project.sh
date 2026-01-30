@@ -104,6 +104,7 @@ if [[ $tech == "Rails 🛤️" ]]; then
 
   # PREREQUISITES
 
+  echo "----------"
   echo "Does the production branch of your Rails codebase have all of these?"
   echo " ↳ .ruby-version"
   echo " ↳ config/credentials/production.yml.enc"
@@ -155,21 +156,28 @@ if [[ $tech == "Rails 🛤️" ]]; then
 fi
 
 if [[ $tech == "Svelte Kit ⚡️" ]]; then
-  echo "✅ Do the DNS records of $domain point to $server server?"
+  echo "----------"
+  echo "Do the DNS records of $domain point to $server server?"
+
   wait_until_yes
 
+  echo "----------"
+  echo "✅ DNS is ready"
+  echo "----------"
   echo "Does your codebase have the following?"
   echo " ↳ a production branch"
   echo " ↳ @svelte/adaptor-node"
   echo " ↳ .env.example"
   echo " ↳ systemd.service"
   echo " ↳ nginx/$domain.conf"
+
   wait_until_yes
 
   echo "----------"
   echo "✅ Code base is ready"
   echo "----------"
   echo "Name the deploy user:"
+  
   read deploy
 
   scp ./setup-deploy-user.sh $server:~/
