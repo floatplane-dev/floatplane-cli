@@ -177,8 +177,12 @@ if [[ $tech == "Svelte Kit ⚡️" ]]; then
   echo "✅ Code base is ready"
   echo "----------"
   echo "Name the deploy user:"
-  
+
   read deploy
+
+  echo "----------"
+  echo "✅ Deploy user: $deploy"
+  echo "----------"
 
   scp ./setup-deploy-user.sh $server:~/
   ssh -t $server "~/setup-deploy-user.sh $deploy"
