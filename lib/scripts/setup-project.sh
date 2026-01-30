@@ -105,13 +105,17 @@ if [[ $tech == "Rails 🛤️" ]]; then
   # PREREQUISITES
 
   echo "Does the production branch of your Rails codebase have all of these?"
-  echo "✅ .ruby-version"
-  echo "✅ config/credentials/production.yml.enc"
-  echo "✅ config/puma.service"
-  echo "✅ nginx/$domain.conf"
-  echo "✅ GET /api/sanity-check"
+  echo " ↳ .ruby-version"
+  echo " ↳ config/credentials/production.yml.enc"
+  echo " ↳ config/puma.service"
+  echo " ↳ nginx/$domain.conf"
+  echo " ↳ GET /api/sanity-check"
 
   wait_until_yes
+
+  echo "----------"
+  echo "✅ Code base is ready"
+  echo "----------"
 
   # DEPLOY USER
 
