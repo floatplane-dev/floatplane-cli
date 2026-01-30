@@ -16,11 +16,6 @@ grep -qE "from\s*['\"]@sveltejs/adapter-node['\"]" svelte.config.* || {
     exit 1
 }
 
-[[ -f pm2.config.js ]] || {
-    echo "❌ pm2.config.js is missing" >&2
-    exit 1
-}
-
 if [ -f ".env.example" ]; then
   echo "----------"
   echo "Enter .env.production in this format:"
@@ -37,12 +32,15 @@ fi
 echo "----------"
 echo "nvm install"
 sudo -u $deploy bash -lc 'nvm install'
+echo "✅ Done"
 echo "----------"
 echo "npm install"
 sudo -u $deploy bash -lc 'npm install'
+echo "✅ Done"
 echo "----------"
 echo "npm run build"
 sudo -u $deploy bash -lc 'npm run build'
+echo "✅ Done"
 
 # DAEMON
 

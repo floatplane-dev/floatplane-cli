@@ -5,11 +5,13 @@ set -e
 deploy=$1
 
 if [ -f ~/.bash_profile ]; then
-    echo "~/.bash_profile already exists"
-    ls -l ~/.bash_profile
+    echo "----------"
+    echo "✅ .bash_profile already exists"
+    echo "----------"
 else
     echo "----------"
     echo "Creating .bash_profile ..."
+    echo "----------"
     touch ~/.bash_profile
     echo "----------"
     echo "✅ Created .bash_profile"

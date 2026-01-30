@@ -155,13 +155,15 @@ if [[ $tech == "Svelte Kit ⚡️" ]]; then
   wait_until_yes
 
   echo "Does your codebase have the following?"
-  echo "✅ a production branch"
-  echo "✅ @svelte/adaptor-node"
-  echo "✅ .env.example"
-  echo "✅ systemd.service"
-  echo "✅ nginx/$domain.conf"
+  echo " ↳ a production branch"
+  echo " ↳ @svelte/adaptor-node"
+  echo " ↳ .env.example"
+  echo " ↳ systemd.service"
+  echo " ↳ nginx/$domain.conf"
   wait_until_yes
 
+  echo "----------"
+  echo "✅ Code base is ready"
   echo "----------"
   echo "Name the deploy user:"
   read deploy
