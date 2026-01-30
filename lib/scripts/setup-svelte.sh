@@ -29,7 +29,8 @@ if [ -f ".env.example" ] && [ ! -f ".env.production" ]; then
   echo $(cat .env.example)
   echo "----------"
   read env_vars
-  sudo -u $deploy bash -lc 'echo $env_vars >> .env.production'
+  echo $env_vars > .env.production
+  sudo chown $deploy:$deploy .env.production
   echo "----------"
   echo "✅ .env.production created"
   echo "----------"
@@ -41,6 +42,10 @@ fi
 
 # BUILD
 
+echo "git pull"
+sudo -u $deploy bash -lc 'cd /var/www/$domain; git pull'
+echo "✅ Done"
+echo "----------"
 echo "nvm install"
 sudo -u $deploy bash -lc 'cd /var/www/$domain; nvm install'
 echo "✅ Done"

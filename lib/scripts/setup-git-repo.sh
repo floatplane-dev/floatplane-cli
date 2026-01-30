@@ -18,7 +18,9 @@ wait_until_yes() {
 }
 
 if [ -d "/var/www/$domain" ]; then
+  echo "----------"
   echo "✅ Git repo already exists"
+  echo "----------"
 else
   echo "----------"
   echo "Creating git repo 🦑"
