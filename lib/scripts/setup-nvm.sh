@@ -19,7 +19,10 @@ fi
 # Note: `which nvm` returns nothing because NVM is not an executable binary.
 # It's a shell function defined in ~/.nvm/nvm.sh.
 
-if command -v nvm >/dev/null 2>&1; then
+
+if sudo -u $deploy bash -lc 'which pm2' 2>/dev/null | grep -Fx "/home/$deploy/.bun/bin/pm2" >/dev/null; then
+
+if sudo -u interflux bash -lc 'command -v nvm' | grep -Fxq "nvm"; then
     echo "----------"
     echo "✅ NVM is already installed"
     echo "----------"
