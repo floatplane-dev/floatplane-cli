@@ -3,6 +3,7 @@
 set -e
 
 domain=$1
+deploy=$2
 
 echo "----------"
 echo "Setting up Svelte Kit ⚡️"
