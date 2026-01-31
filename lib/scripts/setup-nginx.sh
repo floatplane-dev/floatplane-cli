@@ -48,7 +48,7 @@ fi
 
 echo "----------"
 echo "Configuring Nginx for HTTP..."
-cat <<EOF > /etc/nginx/sites-available/$domain.temp.conf
+sudo cat <<EOF > /etc/nginx/sites-available/$domain.temp.conf
 server
 {
   listen 80;
