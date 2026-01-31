@@ -157,19 +157,12 @@ fi
 
 if [[ $tech == "Svelte Kit ⚡️" ]]; then
   echo "----------"
-  echo "Do the DNS records of $domain point to $server server?"
-
-  wait_until_yes
-
-  echo "----------"
-  echo "✅ DNS is ready"
-  echo "----------"
-  echo "Does your codebase have the following?"
-  echo " ↳ a production branch"
-  echo " ↳ @svelte/adaptor-node"
-  echo " ↳ .env.example"
-  echo " ↳ systemd.service"
-  echo " ↳ nginx/$domain.conf"
+  echo "Have you done the following? 🥦"
+  echo "👉🏼 Created git branch named: production"
+  echo "👉🏼 @svelte/adaptor-node"
+  echo "👉🏼 .env.example"
+  echo "👉🏼 systemd.service"
+  echo "👉🏼 nginx/$domain.conf"
 
   wait_until_yes
 
