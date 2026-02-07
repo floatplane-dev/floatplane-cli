@@ -65,7 +65,7 @@ echo "----------"
 # DAEMON
 
 echo "Configuring daemon"
-sudo ln -s /var/www/$domain/systemd.service /etc/systemd/system/$domain.service
+sudo ln -nsf /var/www/$domain/systemd.service /etc/systemd/system/$domain.service
 sudo systemctl daemon-reload
 echo "✅ Done"
 echo "----------"
