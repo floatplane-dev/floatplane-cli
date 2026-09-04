@@ -22,7 +22,6 @@ echo "----------"
 echo "Have you done all of the below? 🥦" 
 echo "👉🏼 The A and AAAA records of $domain are pointing at the IP of server $server."
 echo "👉🏼 The code base has nginx/$domain.conf for HTTPS setup."
-echo "👉🏼 The code base has a protected branch called production."
 
 wait_until_yes
 

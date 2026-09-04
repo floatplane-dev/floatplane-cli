@@ -49,6 +49,9 @@ else
   echo "4. Done?"
   wait_until_yes
   echo "----------"
+  echo "Does this git repo have a production branch?"
+  wait_until_yes
+  echo "----------"
   echo "Creating new Git repo ..."
   mkdir /var/www/$domain
   cd /var/www/$domain

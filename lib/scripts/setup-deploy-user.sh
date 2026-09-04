@@ -17,7 +17,7 @@ else
     echo "----------"
     echo "Creating deploy user named: $deploy"
     echo "----------"
-    ssh -t $server "sudo adduser --system --group --home /home/$deploy --shell /bin/bash $deploy"
+    sudo adduser --system --group --home /home/$deploy --shell /bin/bash $deploy
     echo "----------"
     echo "✅ Created deploy user"
     echo "----------"

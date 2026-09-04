@@ -42,6 +42,7 @@ echo "What kind of project?"
 
 options[0]="Rails 🛤️"
 options[1]="Svelte Kit ⚡️"
+options[2]="Static HTML 🧊"
 # options[2]="Ember 🐹"
 # options[3]="Deno 🦕"
 # options[4]="Gulp 🍹"
@@ -60,45 +61,6 @@ read domain
 echo "----------"
 echo "Connecting to $server ..."
 echo "----------"
-
-# if [[ $tech == "Ember 🐹" ]]; then
-#   scp ./setup-git-repo.sh $server:~/
-#   ssh -t $server "~/setup-git-repo.sh $domain"
-#   scp ./setup-ember.sh $server:~/
-#   ssh -t $server "~/setup-ember.sh $domain"
-#   scp ./setup-nginx.sh $server:~/
-#   ssh -t $server "~/setup-nginx.sh $domain"
-#   echo "----------"
-#   echo "Done!"
-#   echo "----------"
-#   echo "FINAL STEP:"
-#   echo "👉🏼 Open $domain in your browser. Check whether all is working!"
-#   sleep 1
-#   echo "3"
-#   sleep 1
-#   echo "2"
-#   sleep 1
-#   echo "1"
-#   sleep 1
-#   open https://$domain
-#   echo "----------"
-# fi
-
-# if [[ $tech == "Deno 🦕" ]]; then
-#   scp ./setup-git-repo.sh $server:~/
-#   ssh -t $server "~/setup-git-repo.sh $domain"
-#   scp ./setup-deno.sh $server:~/
-#   ssh -t $server "~/setup-deno.sh $domain"
-#   scp ./setup-nginx.sh $server:~/
-#   ssh -t $server "~/setup-nginx.sh $domain"
-#   echo "----------"
-#   echo "Done!"
-#   echo "----------"
-#   echo "Possible next steps:"
-#   echo "👉🏼 Check if Deno API is alive with: curl https://$domain/sanity-check"
-#   echo "👉🏼 Populate the database"
-#   echo "----------"
-# fi
 
 if [[ $tech == "Rails 🛤️" ]]; then
 
@@ -190,7 +152,7 @@ if [[ $tech == "Svelte Kit ⚡️" ]]; then
   ssh -t $server "~/setup-nvm.sh $deploy"
 
   scp ./setup-svelte.sh $server:~/
-  ssh -t $server "~/setup-svelte.sh $domain $deploy"
+  ssh -t $server "~/setup-svelte.sh $domain $deploy $server"
 
   scp ./setup-nginx.sh $server:~/
   ssh -t $server "~/setup-nginx.sh $domain"
@@ -210,28 +172,50 @@ if [[ $tech == "Svelte Kit ⚡️" ]]; then
   echo "----------"
 fi
 
-# if [[ $tech == "Gulp 🍹" ]]; then
-#   scp ./setup-git-repo.sh $server:~/
-#   ssh -t $server "~/setup-git-repo.sh $domain"
-#   scp ./setup-gulp.sh $server:~/
-#   ssh -t $server "~/setup-gulp.sh $domain"
-#   scp ./setup-nginx.sh $server:~/
-#   ssh -t $server "~/setup-nginx.sh $domain"
-#   echo "----------"
-#   echo "Done!"
-#   echo "----------"
-#   echo "FINAL STEP:"
-#   echo "👉🏼 Open $domain in your browser. Check whether all is working!"
-#   sleep 1
-#   echo "3"
-#   sleep 1
-#   echo "2"
-#   sleep 1
-#   echo "1"
-#   sleep 1
-#   open https://$domain
-#   echo "----------"
-# fi
+if [[ $tech == "Static HTML 🧊" ]]; then
+  echo "----------"
+  echo "Have you done the following? 🥦"
+  echo "👉🏼 Created git branch named: production"
+
+  wait_until_yes
+
+  echo "----------"
+  echo "✅ Code base is ready"
+  echo "----------"
+  echo "Name the deploy user:"
+
+  read deploy
+
+  echo "----------"
+  echo "✅ Deploy user: $deploy"
+  echo "----------"
+
+  scp ./setup-deploy-user.sh $server:~/
+  ssh -t $server "~/setup-deploy-user.sh $deploy"
+
+  scp ./setup-logs.sh $server:~/
+  ssh -t $server "~/setup-logs.sh $domain $deploy"
+
+  scp ./setup-git-repo.sh $server:~/
+  ssh -t $server "~/setup-git-repo.sh $domain $deploy"
+
+  scp ./setup-nginx.sh $server:~/
+  ssh -t $server "~/setup-nginx.sh $domain"
+  echo "----------"
+  echo "✅ Done"
+  echo "----------"
+  echo "FINAL STEP:"
+  echo "👉🏼 Open $domain in your browser. Check whether all is working!"
+  sleep 1
+  echo "3"
+  sleep 1
+  echo "2"
+  sleep 1
+  echo "1"
+  sleep 1
+  open https://$domain
+  echo "----------"
+fi
 
 # TODO: reset / wipe project
 # rm nginx symbolic link

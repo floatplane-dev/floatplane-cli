@@ -4,7 +4,7 @@ set -e
 
 deploy=$1
 
-if [ -f ~/.bash_profile ]; then
+if sudo test -f "/home/$deploy/.bash_profile"; then
     echo "----------"
     echo "✅ .bash_profile already exists"
     echo "----------"
@@ -12,7 +12,7 @@ else
     echo "----------"
     echo "Creating .bash_profile ..."
     echo "----------"
-    touch ~/.bash_profile
+    sudo -u $deploy bash -lc "touch ~/.bash_profile"
     echo "----------"
     echo "✅ Created .bash_profile"
     echo "----------"

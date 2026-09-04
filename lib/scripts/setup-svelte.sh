@@ -4,6 +4,19 @@ set -e
 
 domain=$1
 deploy=$2
+server=$3
+
+wait_until_yes() {
+  while true; do
+  select answer in yes no; do
+      case $answer in
+      yes) break 2;;
+      no)  echo "Please do so now";;
+      *)   echo "Invalid choice";;
+      esac
+  done
+  done
+}
 
 echo "----------"
 echo "Setting up Svelte Kit ⚡️"
@@ -12,10 +25,11 @@ echo "cd /var/www/$domain"
 cd /var/www/$domain
 echo "----------"
 
-grep -qE "from\s*['\"]@sveltejs/adapter-node['\"]" svelte.config.* || {
-    echo "❌ adapter-node is not the default adaptor" >&2
-    exit 1
-}
+# Outdated
+# grep -qE "from\s*['\"]@sveltejs/adapter-node['\"]" svelte.config.* || {
+#     echo "❌ adapter-node is not the default adaptor" >&2
+#     exit 1
+# }
 
 if [[ ! -f /var/www/"$domain"/systemd.service ]]; then
     echo "❌ systemd.service does not exist" >&2
@@ -24,19 +38,30 @@ fi
 
 if [ -f ".env.example" ] && [ ! -f ".env.production" ]; then
   echo "----------"
-  echo "Creating .env.production ..."
+
+  cp .env.example .env.production
+
+  echo "✅ Template for secrets prepared"
   echo "----------"
-  echo "Enter production secrets in the format below:"
-  echo $(cat .env.example)
+  echo "Next steps"
+  echo " ↳ ssh $server"
+  echo " ↳ cd /var/www/$domain"
+  echo " ↳ vim .env.production"
+  echo " ↳ add secrets"
+  echo " ↳ save"
+  echo ""
+  echo "Done?"
+  
+  wait_until_yes
+  
   echo "----------"
-  read env_vars
-  echo "----------"
-  echo $env_vars > .env.production
-  sudo chown $deploy:$deploy .env.production
-  echo "----------"
-  echo "✅ .env.production created"
+  echo "✅ Secrets added"
   echo "----------"
 
+  sudo chown $deploy:$deploy .env.production
+
+  echo "✅ Permissions set on secrets"
+  echo "----------"
 else
   echo "----------"
   echo "✅ .env.production already exists"

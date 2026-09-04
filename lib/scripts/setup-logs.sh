@@ -5,6 +5,25 @@ set -e
 domain=$1
 deploy=$2
 
+# ACL
+
+if command -v setfacl >/dev/null 2>&1; then
+    echo "----------"
+    echo "✅ ACL is already installed"
+    echo "----------"
+else
+    echo "----------"
+    echo "Installing ACL ..."
+    echo "----------"
+    # This command fails because Debian dropped support for our version
+    # TODO: upgrade Debian
+    # sudo apt -y update -qq
+    sudo apt -y install acl
+    echo "----------"
+    echo "✅ ACL installed"
+    echo "----------"
+fi
+
 # LOGS
 
 # Rails, Puma, Nginx, Bullet and PM2 all should log to /var/log and not to log/ in project root.
