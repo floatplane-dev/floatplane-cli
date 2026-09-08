@@ -6,6 +6,9 @@ echo "----------"
 echo "Floatplane CLI"
 echo "----------"
 
+# Directory the user ran `fp` from (needed for project files like .fprc)
+caller_dir=$(pwd)
+
 # Get the work directory in which this file is located.
 wd=$(dirname -- "$(readlink -f -- "$0")")
 
@@ -39,7 +42,7 @@ fi
 
 if [ "$1" == 'deploy' ];
 then
-  sh ./deploy.sh
+  ./deploy.sh "$caller_dir"
   exit 0
 fi
 
