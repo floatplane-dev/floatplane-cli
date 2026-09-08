@@ -14,13 +14,13 @@ source "$app_dir/.fprc"
 echo "----------"
 echo "⛵️ deploying ..."
 echo "----------"
-echo "SERVER=$SERVER"
+echo "SSH_HOST=$SSH_HOST"
 echo "DOMAIN=$DOMAIN"
 echo "TECH=$TECH"
 echo "----------"
 
-if [ "$SERVER" != "melbourne" ] && [ "$TECH" != "amsterdam" ]; then
-  echo "❌ unsupported SERVER: $SERVER"
+if [ "$SSH_HOST" != "melbourne" ] && [ "$SSH_HOST" != "amsterdam" ]; then
+  echo "❌ unsupported SSH_HOST: $SSH_HOST"
   exit 1
 fi
 
@@ -34,11 +34,11 @@ if [ "$TECH" != "svelte" ] && [ "$TECH" != "rails" ]; then
   exit 1
 fi
 
-scp ./deploy-$TECH.sh $SERVER:~/
+scp ./deploy-$TECH.sh $SSH_HOST:~/
 echo "----------"
 echo "✅ scp"
 echo "----------"
-ssh -t $SERVER "~/deploy-$TECH.sh $DOMAIN"
+ssh -t $SSH_HOST "~/deploy-$TECH.sh $DOMAIN"
 echo "----------"
 echo "✅ deploy complete"
 echo "----------"
