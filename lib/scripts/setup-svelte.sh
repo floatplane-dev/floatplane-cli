@@ -2,9 +2,9 @@
 
 set -e
 
-domain=$1
-deploy=$2
-server=$3
+DOMAIN=$1
+SSH_HOST=$2
+DEPLOY_USER=bot
 
 wait_until_yes() {
   while true; do
@@ -21,8 +21,8 @@ wait_until_yes() {
 echo "----------"
 echo "Setting up Svelte Kit ⚡️"
 echo "----------"
-echo "cd /var/www/$domain"
-cd /var/www/$domain
+echo "cd /var/www/$DOMAIN"
+cd /var/www/$DOMAIN
 echo "----------"
 
 # Outdated
@@ -31,7 +31,7 @@ echo "----------"
 #     exit 1
 # }
 
-if [[ ! -f /var/www/"$domain"/systemd.service ]]; then
+if [[ ! -f /var/www/"$DOMAIN"/systemd.service ]]; then
     echo "❌ systemd.service does not exist" >&2
     exit 1
 fi
@@ -44,8 +44,8 @@ if [ -f ".env.example" ] && [ ! -f ".env.production" ]; then
   echo "✅ Template for secrets prepared"
   echo "----------"
   echo "Next steps"
-  echo " ↳ ssh $server"
-  echo " ↳ cd /var/www/$domain"
+  echo " ↳ ssh $SSH_HOST"
+  echo " ↳ cd /var/www/$DOMAIN"
   echo " ↳ vim .env.production"
   echo " ↳ add secrets"
   echo " ↳ save"
@@ -58,7 +58,7 @@ if [ -f ".env.example" ] && [ ! -f ".env.production" ]; then
   echo "✅ Secrets added"
   echo "----------"
 
-  sudo chown $deploy:$deploy .env.production
+  sudo chown $DEPLOY_USER:$DEPLOY_USER .env.production
 
   echo "✅ Permissions set on secrets"
   echo "----------"
@@ -71,32 +71,32 @@ fi
 # BUILD
 
 echo "git pull"
-sudo -u $deploy bash -lc "cd /var/www/$domain; git pull"
+sudo -u $DEPLOY_USER bash -lc "cd /var/www/$DOMAIN; git pull"
 echo "✅ Done"
 echo "----------"
 echo "nvm install"
-sudo -u $deploy bash -lc "cd /var/www/$domain; nvm install"
+sudo -u $DEPLOY_USER bash -lc "cd /var/www/$DOMAIN; nvm install"
 echo "✅ Done"
 echo "----------"
 echo "npm install"
-sudo -u $deploy bash -lc "cd /var/www/$domain; npm install"
+sudo -u $DEPLOY_USER bash -lc "cd /var/www/$DOMAIN; npm install"
 echo "✅ Done"
 echo "----------"
 echo "npm run build"
-sudo -u $deploy bash -lc "cd /var/www/$domain; npm run build"
+sudo -u $DEPLOY_USER bash -lc "cd /var/www/$DOMAIN; npm run build"
 echo "✅ Done"
 echo "----------"
 
 # DAEMON
 
 echo "Configuring daemon"
-sudo ln -nsf /var/www/$domain/systemd.service /etc/systemd/system/$domain.service
+sudo ln -nsf /var/www/$DOMAIN/systemd.service /etc/systemd/system/$DOMAIN.service
 sudo systemctl daemon-reload
 echo "✅ Done"
 echo "----------"
 echo "Starting daemon"
-sudo systemctl stop $domain
-sudo systemctl start $domain
-sudo systemctl status $domain --no-pager
+sudo systemctl stop $DOMAIN
+sudo systemctl start $DOMAIN
+sudo systemctl status $DOMAIN --no-pager
 echo "✅ Done"
 echo "----------"

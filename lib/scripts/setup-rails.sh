@@ -2,14 +2,14 @@
 
 set -e
 
-domain=$1
-deploy=$2
+DOMAIN=$1
+DEPLOY_USER=bot
 
 echo "----------"
 echo "Setting up Rails 🛤️ ..."
 echo "----------"
 echo "Changing directory ..."
-cd /var/www/$domain
+cd /var/www/$DOMAIN
 echo "✅ Done"
 
 # POSTGRES
@@ -22,15 +22,15 @@ echo "✅ Done"
 # POSTGRES USER
 
 echo "----------"
-echo "Creating Postgres user named \"$deploy\" ..."
-sudo -u postgres createuser -s $deploy
+echo "Creating Postgres user named \"$DEPLOY_USER\" ..."
+sudo -u postgres createuser -s $DEPLOY_USER
 echo "✅ Done"
 echo "----------"
 echo "Enter Postgres user password:"
 echo "👉🏼 Store this in 1Password"
 echo "👉🏼 Store this in config/credentials/production.yml.enc"
-read -s db_pass
-sudo -u postgres psql -c "ALTER USER $deploy WITH PASSWORD '$db_pass';"
+read -s DB_PASS
+sudo -u postgres psql -c "ALTER USER $DEPLOY_USER WITH PASSWORD '$DB_PASS';"
 echo "✅ Done"
 
 # RBENV
@@ -42,34 +42,18 @@ echo "✅ Done"
 
 echo "----------"
 echo "Installing rbenv for deploy user ..."
-sudo -u $deploy git clone https://github.com/rbenv/rbenv.git /home/$deploy/.rbenv
+sudo -u $DEPLOY_USER git clone https://github.com/rbenv/rbenv.git /home/$DEPLOY_USER/.rbenv
 # We should run `rbenv init`, but fails.
 # Instead we add manually what `rbenv init` would have done.
-sudo -u piccolo bash -c 'echo "eval \"\$(~/.rbenv/bin/rbenv init - --no-rehash bash)\"" > /home/piccolo/.bash_profile'
+sudo -u $DEPLOY_USER bash -c 'echo "eval \"\$(~/.rbenv/bin/rbenv init - --no-rehash bash)\"" > /home/$DEPLOY_USER/.bash_profile'
 echo "✅ Done"
-
-# echo "----------"
-# echo "Installing rbenv for admin user ..."
-# git clone https://github.com/rbenv/rbenv.git ~/.rbenv
-# echo '' >> ~/.config/fish/config.fish
-# Make the rbenv command available to rbenv init
-# echo 'fish_add_path $HOME/.rbenv/bin' >> ~/.config/fish/config.fish
-# Add the shims to the PATH
-# echo 'status is-interactive; and source (rbenv init - | psub)' >> ~/.config/fish/config.fish
 
 echo "----------"
 echo "Installing Rbenv plugins for deploy user ..."
-sudo -u $deploy mkdir -p /home/$deploy/.rbenv/plugins
-sudo -u $deploy git clone https://github.com/rbenv/ruby-build.git /home/$deploy/.rbenv/plugins/ruby-build
-sudo -u $deploy git clone https://github.com/rbenv/rbenv-vars.git /home/$deploy/.rbenv/plugins/rbenv-vars
+sudo -u $DEPLOY_USER mkdir -p /home/$DEPLOY_USER/.rbenv/plugins
+sudo -u $DEPLOY_USER git clone https://github.com/rbenv/ruby-build.git /home/$DEPLOY_USER/.rbenv/plugins/ruby-build
+sudo -u $DEPLOY_USER git clone https://github.com/rbenv/rbenv-vars.git /home/$DEPLOY_USER/.rbenv/plugins/rbenv-vars
 echo "✅ Done"
-
-# echo "----------"
-# echo "Installing Rbenv plugins for admin user ..."
-# mkdir -p ~/.rbenv/plugins
-# cd ~/.rbenv/plugins
-# git clone https://github.com/rbenv/ruby-build.git
-# git clone https://github.com/rbenv/rbenv-vars.git
 
 # RUBY
 
@@ -78,12 +62,8 @@ echo "Installing Ruby for deploy user ..."
 rubyversion=$(cat .ruby-version)
 echo $rubyversion
 # On Mac you can simply run `rbenv install`. On Debian we must specify the exact version.
-sudo -u $deploy bash -lc "rbenv install $rubyversion --skip-existing"
+sudo -u $DEPLOY_USER bash -lc "rbenv install $rubyversion --skip-existing"
 echo "✅ Done"
-
-# echo "----------"
-# echo "Installing Ruby for admin user ..."
-# rbenv install $rubyversion --skip-existing
 
 # BUNDLER
 
@@ -93,30 +73,22 @@ echo "✅ Done"
 
 echo "----------"
 echo "Installing Bundler v$bundlerversion for deploy user ..."
-sudo -u $deploy bash -lc "gem install bundler -v \"$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)\""
+sudo -u $DEPLOY_USER bash -lc "gem install bundler -v \"$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)\""
 echo "✅ Done"
-
-# echo "----------"
-# echo "Installing Bundler for admin user ..."
-# gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
 
 # GEMS
 
 echo "----------"
 echo "Installing gems for deploy user ..."
-sudo -u $deploy bash -lc "bundle install"
+sudo -u $DEPLOY_USER bash -lc "bundle install"
 echo "✅ Done"
-
-# echo "----------"
-# echo "Installing gems for admin user ..."
-# bundle install
 
 # SECRETS
 
 echo "----------"
 echo "Enter the config/credentials/production.key:"
-read -s production_key
-echo $production_key >> config/credentials/production.key
+read -s PRODUCTION_KEY
+echo $PRODUCTION_KEY >> config/credentials/production.key
 echo "✅ Done"
 
 # ENVIRONMENT
@@ -138,26 +110,26 @@ echo "✅ Done"
 
 echo "----------"
 echo "Creating database ..."
-sudo -u $deploy bash -lc "bin/rails db:create"
+sudo -u $DEPLOY_USER bash -lc "bin/rails db:create"
 echo "✅ Done"
 
 # DATABASE SCHEMA
 
 echo "----------"
 echo "Apply database schema..."
-sudo -u $deploy bash -lc "bin/rails db:schema:load"
+sudo -u $DEPLOY_USER bash -lc "bin/rails db:schema:load"
 echo "✅ Done"
 
 # PUMA
 
 echo "----------"
 echo "Configuring Puma service"
-sudo ln -s /var/www/$domain/config/puma.service /etc/systemd/system/$deploy.service
+sudo ln -s /var/www/$DOMAIN/config/puma.service /etc/systemd/system/$DEPLOY_USER.service
 sudo systemctl daemon-reload
 echo "✅ Done"
 
 echo "----------"
 echo "Starting Puma service"
-sudo systemctl start $deploy
-sudo systemctl status $deploy --no-pager
+sudo systemctl start $DEPLOY_USER
+sudo systemctl status $DEPLOY_USER --no-pager
 echo "✅ Done"

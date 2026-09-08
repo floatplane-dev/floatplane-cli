@@ -2,8 +2,9 @@
 
 set -e
 
-domain=$1
-deploy=$2
+DOMAIN=$1
+DEPLOY_USER=bot
+SUDO_USER=admin
 
 # ACL
 
@@ -28,34 +29,34 @@ fi
 
 # Rails, Puma, Nginx, Bullet and PM2 all should log to /var/log and not to log/ in domain root.
 
-if [[ -d "/var/log/$domain" ]]; then
+if [[ -d "/var/log/$DOMAIN" ]]; then
     echo "----------"
-    echo "✅ /var/log/$domain already exists"
+    echo "✅ /var/log/$DOMAIN already exists"
     echo "----------"
 else
     echo "----------"
-    echo "Creating /var/log/$domain"
+    echo "Creating /var/log/$DOMAIN"
     echo "----------"
 
     # Create directory for logging to
-    sudo mkdir /var/log/$domain
+    sudo mkdir /var/log/$DOMAIN
 
     # Make the deploy user owner of the logs
-    sudo chown -R $deploy:$deploy /var/log/$domain
-    sudo chmod 775 /var/log/$domain
+    sudo chown -R $DEPLOY_USER:$DEPLOY_USER /var/log/$DOMAIN
+    sudo chmod 775 /var/log/$DOMAIN
 
     # Grant admin access to the logs
-    sudo setfacl -R -m u:admin:rwx /var/log/$domain/
-    sudo setfacl -R -d -m u:admin:rwx /var/log/$domain/
-    sudo getfacl /var/log/$domain/
+    sudo setfacl -R -m u:$SUDO_USER:rwx /var/log/$DOMAIN/
+    sudo setfacl -R -d -m u:$SUDO_USER:rwx /var/log/$DOMAIN/
+    sudo getfacl /var/log/$DOMAIN/
 
     # Allow Nginx to also write logs
-    sudo usermod -aG $deploy www-data
+    sudo usermod -aG $DEPLOY_USER www-data
     sudo systemctl restart nginx
 
     # Never keeps logs older than 7 days
-    sudo tee /etc/logrotate.d/$domain > /dev/null <<EOF
-/var/log/$domain/*.log {
+    sudo tee /etc/logrotate.d/$DOMAIN > /dev/null <<EOF
+/var/log/$DOMAIN/*.log {
     daily
     rotate 7
     compress
@@ -66,6 +67,6 @@ else
 EOF
 
     echo "----------"
-    echo "✅ Created /var/log/$domain"
+    echo "✅ Created /var/log/$DOMAIN"
     echo "----------"
 fi

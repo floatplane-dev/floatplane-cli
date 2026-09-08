@@ -2,9 +2,9 @@
 
 set -e
 
-deploy=$1
+DEPLOY_USER=bot
 
-if sudo test -f "/home/$deploy/.bash_profile"; then
+if sudo test -f "/home/$DEPLOY_USER/.bash_profile"; then
     echo "----------"
     echo "✅ .bash_profile already exists"
     echo "----------"
@@ -12,7 +12,7 @@ else
     echo "----------"
     echo "Creating .bash_profile ..."
     echo "----------"
-    sudo -u $deploy bash -lc "touch ~/.bash_profile"
+    sudo -u $DEPLOY_USER bash -lc "touch ~/.bash_profile"
     echo "----------"
     echo "✅ Created .bash_profile"
     echo "----------"
@@ -29,7 +29,7 @@ else
     echo "----------"
     echo "Installing NVM ..."
     echo "----------"
-    sudo -u $deploy bash -lc 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash'
+    sudo -u $DEPLOY_USER bash -lc 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash'
     echo "----------"
     echo "✅ Done installing NVM"
     echo "----------"

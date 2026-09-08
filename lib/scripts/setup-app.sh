@@ -2,6 +2,8 @@
 
 set -eou pipefail
 
+APP_DIR="${1:-.}"
+
 wait_until_yes() {
   while true; do
   select answer in yes no; do
@@ -16,62 +18,75 @@ wait_until_yes() {
 
 echo "Setting up app 🌱"
 echo "----------"
-echo "On which server? 🚀"
-echo "Enter the SSH alias (e.g. melbourne, amsterdam, ...)"
-read server
 
-# ssh_aliases=(`grep "^Host " ~/.ssh/config | awk '{print $2}' | sort -u`)
-# select ssh_alias in "${ssh_aliases[@]}"; do
-#   [ "$ssh_alias" ] && break
-#   echo "Please enter a number from the list."
-# done
-# 
-# HAS ODD BUG
-# ----------
-# 1) setup-deno.sh	   9) setup-server-1.sh	    17) frankfurt
-# 2) setup-ember.sh	  10) setup-server-2.sh	    18) github.com
-# 3) setup-git-repo.sh	  11) setup-server-3.sh	    19) madrid
-# 4) setup-gulp.sh	  12) setup-server-4.sh	    20) melbourne
-# 5) setup-logrotation.sh	  13) setup-server-5.sh	    21) mexico
-# 6) setup-nginx.sh	  14) setup-server.sh	    22) osaka
-# 7) setup-app.sh	  15) setup.sh		    23) paris
-# 8) setup-rails.sh	  16) amsterdam
+if [ -f "$APP_DIR/.fprc" ]; then
+  source "$APP_DIR/.fprc"
+fi
+
+if [ -z "${SSH_HOST:-}" ] || [ -z "${DOMAIN:-}" ] || [ -z "${TECH:-}" ]; then
+  echo "On which server? 🚀"
+  echo "Enter the SSH alias (e.g. melbourne, amsterdam, ...)"
+  read SSH_HOST
+
+  # ssh_aliases=(`grep "^Host " ~/.ssh/config | awk '{print $2}' | sort -u`)
+  # select ssh_alias in "${ssh_aliases[@]}"; do
+  #   [ "$ssh_alias" ] && break
+  #   echo "Please enter a number from the list."
+  # done
+  # 
+  # HAS ODD BUG
+  # ----------
+  # 1) setup-deno.sh	   9) setup-server-1.sh	    17) frankfurt
+  # 2) setup-ember.sh	  10) setup-server-2.sh	    18) github.com
+  # 3) setup-git-repo.sh	  11) setup-server-3.sh	    19) madrid
+  # 4) setup-gulp.sh	  12) setup-server-4.sh	    20) melbourne
+  # 5) setup-logrotation.sh	  13) setup-server-5.sh	    21) mexico
+  # 6) setup-nginx.sh	  14) setup-server.sh	    22) osaka
+  # 7) setup-app.sh	  15) setup.sh		    23) paris
+  # 8) setup-rails.sh	  16) amsterdam
+
+  echo "----------"
+  echo "What kind of app?"
+
+  options[0]="rails"
+  options[1]="svelte"
+  options[2]="html"
+  # options[2]="Ember 🐹"
+  # options[3]="Deno 🦕"
+  # options[4]="Gulp 🍹"
+  select TECH in "${options[@]}"
+  do
+    if [[ "${options[*]}" =~ "${TECH}" ]]; then
+      break
+    else
+      echo "Please enter a number from the list."
+    fi
+  done
+
+  
+
+  echo "----------"
+  echo "What's the main domain name of the app? ⛵ (foo.com)"
+  read DOMAIN
+
+  cat > "$APP_DIR/.fprc" <<EOF
+SSH_HOST=$SSH_HOST
+DOMAIN=$DOMAIN
+TECH=$TECH
+EOF
+fi
 
 echo "----------"
-echo "What kind of app?"
-
-options[0]="Rails 🛤️"
-options[1]="Svelte Kit ⚡️"
-options[2]="Static HTML 🧊"
-# options[2]="Ember 🐹"
-# options[3]="Deno 🦕"
-# options[4]="Gulp 🍹"
-select tech in "${options[@]}"
-do
-  if [[ "${options[*]}" =~ "${tech}" ]]; then
-    break
-  else
-    echo "Please enter a number from the list."
-  fi
-done
-
-echo "----------"
-echo "What's the main domain name of the app? ⛵ (foo.com)"
-read domain
-echo "----------"
-echo "Connecting to $server ..."
+echo "Connecting to $SSH_HOST ..."
 echo "----------"
 
-if [[ $tech == "Rails 🛤️" ]]; then
-
-  # PREREQUISITES
-
+if [[ $TECH == "rails" ]]; then
   echo "----------"
   echo "Does the production branch of your Rails codebase have all of these?"
   echo " ↳ .ruby-version"
   echo " ↳ config/credentials/production.yml.enc"
   echo " ↳ config/puma.service"
-  echo " ↳ nginx/$domain.conf"
+  echo " ↳ nginx/$DOMAIN.conf"
   echo " ↳ GET /api/sanity-check"
 
   wait_until_yes
@@ -80,33 +95,21 @@ if [[ $tech == "Rails 🛤️" ]]; then
   echo "✅ Code base is ready"
   echo "----------"
 
-  # DEPLOY USER
+  scp ./setup-deploy-user.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-deploy-user.sh"
 
-  # IMPORTANT: Why bother with a deploy user? 
-  # Running Puma with the admin user, which has sudo powers, allows Rails to run commands as admin.
-  # This is considered bad practice. Instead we ought to create a "deploy" user which has only the
-  # few privileges needed for Puma to run the Rails app via systemd.
+  scp ./setup-logs.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-logs.sh $DOMAIN"
 
-  echo "----------"
-  echo "Choose short name for deploy user (e.g.: interflux, piccolo, ...):"
-  read deploy
-  sudo adduser --system --group --home /home/$deploy --shell /bin/bash $deploy
-  echo "✅ done"
-  echo "----------"
-  scp ./setup-deploy-user.sh $server:~/
-  ssh -t $server "~/setup-deploy-user.sh $deploy"
+  scp ./setup-git-repo.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-git-repo.sh $DOMAIN"
 
-  scp ./setup-logs.sh $server:~/
-  ssh -t $server "~/setup-logs.sh $domain $deploy"
+  scp ./setup-rails.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-rails.sh $DOMAIN"
 
-  scp ./setup-git-repo.sh $server:~/
-  ssh -t $server "~/setup-git-repo.sh $domain $deploy"
+  scp ./setup-nginx.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-nginx.sh $DOMAIN"
 
-  scp ./setup-rails.sh $server:~/
-  ssh -t $server "~/setup-rails.sh $domain $deploy"
-
-  scp ./setup-nginx.sh $server:~/
-  ssh -t $server "~/setup-nginx.sh $domain"
   echo "----------"
   echo "✅ Done"
   echo "----------"
@@ -117,50 +120,44 @@ if [[ $tech == "Rails 🛤️" ]]; then
   echo "----------"
 fi
 
-if [[ $tech == "Svelte Kit ⚡️" ]]; then
+if [[ $TECH == "svelte" ]]; then
   echo "----------"
   echo "Have you done the following? 🥦"
   echo "👉🏼 Created git branch named: production"
   echo "👉🏼 @svelte/adaptor-node"
   echo "👉🏼 .env.example"
   echo "👉🏼 systemd.service"
-  echo "👉🏼 nginx/$domain.conf"
+  echo "👉🏼 nginx/$DOMAIN.conf"
 
   wait_until_yes
 
   echo "----------"
   echo "✅ Code base is ready"
   echo "----------"
-  echo "Name the deploy user:"
 
-  read deploy
+  scp ./setup-deploy-user.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-deploy-user.sh"
 
-  echo "----------"
-  echo "✅ Deploy user: $deploy"
-  echo "----------"
+  scp ./setup-logs.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-logs.sh $DOMAIN"
 
-  scp ./setup-deploy-user.sh $server:~/
-  ssh -t $server "~/setup-deploy-user.sh $deploy"
+  scp ./setup-git-repo.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-git-repo.sh $DOMAIN"
 
-  scp ./setup-logs.sh $server:~/
-  ssh -t $server "~/setup-logs.sh $domain $deploy"
+  scp ./setup-nvm.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-nvm.sh"
 
-  scp ./setup-git-repo.sh $server:~/
-  ssh -t $server "~/setup-git-repo.sh $domain $deploy"
+  scp ./setup-svelte.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-svelte.sh $DOMAIN $SSH_HOST"
 
-  scp ./setup-nvm.sh $server:~/
-  ssh -t $server "~/setup-nvm.sh $deploy"
+  scp ./setup-nginx.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-nginx.sh $DOMAIN"
 
-  scp ./setup-svelte.sh $server:~/
-  ssh -t $server "~/setup-svelte.sh $domain $deploy $server"
-
-  scp ./setup-nginx.sh $server:~/
-  ssh -t $server "~/setup-nginx.sh $domain"
   echo "----------"
   echo "✅ Done"
   echo "----------"
   echo "FINAL STEP:"
-  echo "👉🏼 Open $domain in your browser. Check whether all is working!"
+  echo "👉🏼 Open $DOMAIN in your browser. Check whether all is working!"
   sleep 1
   echo "3"
   sleep 1
@@ -168,11 +165,11 @@ if [[ $tech == "Svelte Kit ⚡️" ]]; then
   sleep 1
   echo "1"
   sleep 1
-  open https://$domain
+  open https://$DOMAIN
   echo "----------"
 fi
 
-if [[ $tech == "Static HTML 🧊" ]]; then
+if [[ $TECH == "html" ]]; then
   echo "----------"
   echo "Have you done the following? 🥦"
   echo "👉🏼 Created git branch named: production"
@@ -182,30 +179,24 @@ if [[ $tech == "Static HTML 🧊" ]]; then
   echo "----------"
   echo "✅ Code base is ready"
   echo "----------"
-  echo "Name the deploy user:"
 
-  read deploy
+  scp ./setup-deploy-user.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-deploy-user.sh"
 
-  echo "----------"
-  echo "✅ Deploy user: $deploy"
-  echo "----------"
+  scp ./setup-logs.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-logs.sh $DOMAIN"
 
-  scp ./setup-deploy-user.sh $server:~/
-  ssh -t $server "~/setup-deploy-user.sh $deploy"
+  scp ./setup-git-repo.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-git-repo.sh $DOMAIN"
 
-  scp ./setup-logs.sh $server:~/
-  ssh -t $server "~/setup-logs.sh $domain $deploy"
+  scp ./setup-nginx.sh $SSH_HOST:~/
+  ssh -t $SSH_HOST "~/setup-nginx.sh $DOMAIN"
 
-  scp ./setup-git-repo.sh $server:~/
-  ssh -t $server "~/setup-git-repo.sh $domain $deploy"
-
-  scp ./setup-nginx.sh $server:~/
-  ssh -t $server "~/setup-nginx.sh $domain"
   echo "----------"
   echo "✅ Done"
   echo "----------"
   echo "FINAL STEP:"
-  echo "👉🏼 Open $domain in your browser. Check whether all is working!"
+  echo "👉🏼 Open $DOMAIN in your browser. Check whether all is working!"
   sleep 1
   echo "3"
   sleep 1
@@ -213,19 +204,9 @@ if [[ $tech == "Static HTML 🧊" ]]; then
   sleep 1
   echo "1"
   sleep 1
-  open https://$domain
+  open https://$DOMAIN
   echo "----------"
 fi
-
-# TODO: reset / wipe app
-# rm nginx symbolic link
-# rm systemd symbolic link
-# sudo rm -rf /var/www/$domain/
-# sudo rm -rf /var/log/$domain/
-# sudo rm -rf /home/$deploy/.ssh/
-# remove deploy user and group entirely
-# remove nginx domain name certs
-# remove postgress databases and user
 
 echo "----------"
 echo "App setup complete 🌱"

@@ -2,12 +2,12 @@
 
 set -e
 
-deploy=$1
+DEPLOY_USER=bot
 
 # which pm2
-# /home/$deploy/.bun/bin/pm2
+# /home/$DEPLOY_USER/.bun/bin/pm2
 
-if sudo -u $deploy bash -lc 'which pm2' 2>/dev/null | grep -Fx "/home/$deploy/.bun/bin/pm2" >/dev/null; then
+if sudo -u $DEPLOY_USER bash -lc 'which pm2' 2>/dev/null | grep -Fx "/home/$DEPLOY_USER/.bun/bin/pm2" >/dev/null; then
     echo "----------"
     echo "✅ PM2 is already installed"
     echo "----------"
@@ -15,7 +15,7 @@ else
     echo "----------"
     echo "Installing PM2 ..."
     echo "----------"
-    sudo -u $deploy bash -lc 'bun install -g pm2'
+    sudo -u $DEPLOY_USER bash -lc 'bun install -g pm2'
     echo "----------"
     echo "Run PM2 upon startup"
 

@@ -26,5 +26,5 @@ then
 fi
 if [ "$option" == "app 🌱" ];
 then
-  ./setup-app.sh
+  ./setup-app.sh "${1:-.}"
 fi

@@ -3,6 +3,8 @@
 set -e
 set -o pipefail
 
+SUDO_USER=admin
+
 wait_until_yes() {
     while true; do
     select answer in yes no; do
@@ -28,10 +30,10 @@ echo "    ↳ frankfurt.server.interflux.com"
 wait_until_yes
 echo "----------"
 echo "Enter the domain name (e.g. sydney.server.floatplane.dev):"
-read domain
+read DOMAIN
 echo "----------"
-echo "Enter an SSH alias (e.g. sydney):"
-read alias
+echo "Enter an SSH host alias (e.g. sydney):"
+read SSH_HOST
 echo "----------"
 ssh_pub_paths=(~/.ssh/*.pub)
 ssh_pub_files=("${ssh_pub_paths[@]##*/}")
@@ -49,32 +51,32 @@ echo "Configuring SSH on: $local_name"
 echo "" >> ~/.ssh/config
 echo "" >> ~/.ssh/config
 cat <<EOF >> ~/.ssh/config
-Host $alias
-  User admin
-  HostName $domain
+Host $SSH_HOST
+  User $SUDO_USER
+  HostName $DOMAIN
   IdentityFile ~/.ssh/$ssh_pub_file
 EOF
 echo "----------"
 echo "Uploading part 1..."
 echo "You will need to enter the root password twice."
-scp ./setup-server-1.sh root@$domain:/
+scp ./setup-server-1.sh root@$DOMAIN:/
 echo "----------"
 echo "Running part 1..."
-ssh root@$domain "/setup-server-1.sh"
+ssh root@$DOMAIN "/setup-server-1.sh"
 echo "----------"
 echo "Uploading $pub to server..."
 # Note: the -f is necessary when there is no private key adjacent to the .pub (we use 1Password)
-ssh-copy-id -f -i $ssh_pub_path $alias
+ssh-copy-id -f -i $ssh_pub_path $SSH_HOST
 echo "----------"
 echo "Uploading part 2..."
-scp ./setup-server-2.sh $alias:~/
+scp ./setup-server-2.sh $SSH_HOST:~/
 echo "----------"
 echo "Running part 2..."
-ssh -t $alias "~/setup-server-2.sh"
+ssh -t $SSH_HOST "~/setup-server-2.sh"
 echo "----------"
 echo "Testing if root can still access server..."
 echo "Enter the password of the root user 3 times:"
-if ! ssh root@$domain "pwd"
+if ! ssh root@$DOMAIN "pwd"
 then
   echo "Root SSH failed, which is good! 🥳"
 else
@@ -85,30 +87,30 @@ else
 fi
 echo "----------"
 echo "Uploading part 3..."
-scp ./setup-server-3.sh $alias:~/
+scp ./setup-server-3.sh $SSH_HOST:~/
 echo "----------"
 echo "Running part 3..."
-ssh -t $alias "~/setup-server-3.sh"
+ssh -t $SSH_HOST "~/setup-server-3.sh"
 echo "----------"
 echo "Uploading part 4..."
-scp ./setup-server-4.sh $alias:~/
+scp ./setup-server-4.sh $SSH_HOST:~/
 echo "----------"
 echo "Running part 4..."
-ssh -t $alias "~/setup-server-4.sh"
+ssh -t $SSH_HOST "~/setup-server-4.sh"
 echo "----------"
 echo "Uploading part 5..."
-scp ./setup-server-5.sh $alias:~/
+scp ./setup-server-5.sh $SSH_HOST:~/
 echo "----------"
 echo "Running part 5..."
-ssh -t $alias "~/setup-server-5.sh"
+ssh -t $SSH_HOST "~/setup-server-5.sh"
 echo "----------"
 echo "Server setup complete 🗿"
 echo "----------"
 echo "NEXT STEPS"
 echo ""
 echo "Wait 10 seconds, then SSH in with:"
-echo "🔑 ssh admin@$domain"
-echo "🔑 ssh $alias"
+echo "🔑 ssh $SUDO_USER@$DOMAIN"
+echo "🔑 ssh $SSH_HOST"
 echo ""
 echo "Then verify:"
 echo "👉🏼 SSH connection was successful (means Firewall did not lock you out)"

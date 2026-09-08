@@ -2,13 +2,13 @@
 
 set -e
 
-domain=$1
+DOMAIN=$1
 
 echo "----------"
 echo "Setting up Deno 🦕"
 echo "----------"
 echo "Changing directory ..."
-cd /var/www/$domain
+cd /var/www/$DOMAIN
 echo "----------"
 echo "Installing Deno ..."
 curl -fsSL https://deno.land/x/install/install.sh | sh

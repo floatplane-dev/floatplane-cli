@@ -20,7 +20,7 @@ cd ../scripts
 # Asks whether you want to set up a server or app
 if [ "$1" == 'setup' ] && [ -z $2 ];
 then
-  sh ./setup.sh
+  sh ./setup.sh "$caller_dir"
   exit 0
 fi
 
@@ -36,7 +36,7 @@ fi
 # Asks questions and then sets up app on server
 if [ "$1" == 'setup' ] &&  [ "$2" == 'app' ];
 then
-  sh ./setup-app.sh
+  sh ./setup-app.sh "$caller_dir"
   exit 0
 fi
 
@@ -55,7 +55,7 @@ then
     echo "Please enter a number from the list."
   done
   [ "$option" == "setup server 🗿" ] && ./setup-server.sh
-  [ "$option" == "setup app 🌱" ] && ./setup-app.sh
+  [ "$option" == "setup app 🌱" ] && ./setup-app.sh "$caller_dir"
   [ "$option" == "deploy 🚀" ] && ./deploy.sh "$caller_dir"
   
   echo "----------"

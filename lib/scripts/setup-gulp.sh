@@ -1,14 +1,16 @@
 #!/bin/bash
 
+# DEPRECATED
+
 set -e
 
-domain=$1
+DOMAIN=$1
 
 echo "----------"
 echo "Setting up Gulp 🍹"
 echo "----------"
 echo "Changing directory ..."
-cd /var/www/$domain
+cd /var/www/$DOMAIN
 
 # TODO: REVIEW
 # echo "----------"

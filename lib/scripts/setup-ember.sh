@@ -2,13 +2,15 @@
 
 set -e
 
-domain=$1
+# DEPRECATED
+
+DOMAIN=$1
 
 echo "----------"
 echo "Setting up Ember 🐹"
 echo "----------"
 echo "Changing directory ..."
-cd /var/www/$domain
+cd /var/www/$DOMAIN
 
 # TODO: REVIEW
 # echo "----------"

@@ -2,14 +2,14 @@
 
 set -eou pipefail
 
-app_dir="${1:-.}"
+APP_DIR="${1:-.}"
 
-if [ ! -f "$app_dir/.fprc" ]; then
-  echo "❌ no .fprc found in $app_dir"
+if [ ! -f "$APP_DIR/.fprc" ]; then
+  echo "❌ no .fprc found in $APP_DIR"
   exit 1
 fi
 
-source "$app_dir/.fprc"
+source "$APP_DIR/.fprc"
 
 echo "----------"
 echo "⛵️ deploying ..."

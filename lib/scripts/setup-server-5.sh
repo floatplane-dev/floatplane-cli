@@ -1,5 +1,7 @@
 #!/usr/bin/env fish
 
+SUDO_USER=admin
+
 echo "----------"
 echo "Removing the fish greeting ..."
 set -U fish_greeting
@@ -9,12 +11,12 @@ omf install lambda
 echo "----------"
 echo "Create domain root directory"
 sudo mkdir -p /var/www/
-sudo chown -R admin:admin /var/www/
+sudo chown -R $SUDO_USER:$SUDO_USER /var/www/
 ls -la /var/www/
 echo "----------"
 echo "Change owner of nginx directories"
-sudo chown -R admin:admin /etc/nginx/sites-enabled/
-sudo chown -R admin:admin /etc/nginx/sites-available/
+sudo chown -R $SUDO_USER:$SUDO_USER /etc/nginx/sites-enabled/
+sudo chown -R $SUDO_USER:$SUDO_USER /etc/nginx/sites-available/
 chmod -R g+s /etc/nginx/sites-enabled/
 chmod -R g+s /etc/nginx/sites-available/
 echo "----------"
