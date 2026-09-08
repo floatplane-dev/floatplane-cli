@@ -25,7 +25,7 @@ else
   echo "----------"
   echo "Creating git repo 🦑"
   echo "----------"
-  echo "Enter the Github SSH URL (git@github.com:floatplane-dev/some-project.git):"
+  echo "Enter the Github SSH URL (git@github.com:floatplane-dev/some-codebase.git):"
   while true; do
     read repo
     if [[ $repo == git@github.com:* ]]; then
@@ -68,11 +68,11 @@ else
   git config core.sshCommand "ssh -i /home/$deploy/.ssh/$deploy@$domain -F /dev/null"
   echo "✅ done"
   echo "----------"
-  echo "Make deploy user owner of project root ..."
+  echo "Make deploy user owner of domain root ..."
   sudo chown -R $deploy:$deploy /var/www/$domain
   echo "✅ done"
   echo "----------"
-  echo "Grant admin access to project ..."
+  echo "Grant admin access to domain root ..."
   sudo setfacl -R -m u:admin:rwx /var/www/$domain/
   sudo setfacl -R -d -m u:admin:rwx /var/www/$domain/
   sudo getfacl /var/www/$domain/

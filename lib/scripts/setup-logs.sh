@@ -26,7 +26,7 @@ fi
 
 # LOGS
 
-# Rails, Puma, Nginx, Bullet and PM2 all should log to /var/log and not to log/ in project root.
+# Rails, Puma, Nginx, Bullet and PM2 all should log to /var/log and not to log/ in domain root.
 
 if [[ -d "/var/log/$domain" ]]; then
     echo "----------"

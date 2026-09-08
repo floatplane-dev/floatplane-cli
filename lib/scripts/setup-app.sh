@@ -14,7 +14,7 @@ wait_until_yes() {
   done
 }
 
-echo "Setting up project 🌱"
+echo "Setting up app 🌱"
 echo "----------"
 echo "On which server? 🚀"
 echo "Enter the SSH alias (e.g. melbourne, amsterdam, ...)"
@@ -34,11 +34,11 @@ read server
 # 4) setup-gulp.sh	  12) setup-server-4.sh	    20) melbourne
 # 5) setup-logrotation.sh	  13) setup-server-5.sh	    21) mexico
 # 6) setup-nginx.sh	  14) setup-server.sh	    22) osaka
-# 7) setup-project.sh	  15) setup.sh		    23) paris
+# 7) setup-app.sh	  15) setup.sh		    23) paris
 # 8) setup-rails.sh	  16) amsterdam
 
 echo "----------"
-echo "What kind of project?"
+echo "What kind of app?"
 
 options[0]="Rails 🛤️"
 options[1]="Svelte Kit ⚡️"
@@ -56,7 +56,7 @@ do
 done
 
 echo "----------"
-echo "What's the main domain name of the project? ⛵ (foo.com)"
+echo "What's the main domain name of the app? ⛵ (foo.com)"
 read domain
 echo "----------"
 echo "Connecting to $server ..."
@@ -217,7 +217,7 @@ if [[ $tech == "Static HTML 🧊" ]]; then
   echo "----------"
 fi
 
-# TODO: reset / wipe project
+# TODO: reset / wipe app
 # rm nginx symbolic link
 # rm systemd symbolic link
 # sudo rm -rf /var/www/$domain/
@@ -228,5 +228,5 @@ fi
 # remove postgress databases and user
 
 echo "----------"
-echo "Project setup complete 🌱"
+echo "App setup complete 🌱"
 echo "----------"

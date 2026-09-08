@@ -14,7 +14,7 @@ cd $wd
 cd ../scripts
 
 # fp setup
-# Asks whether you want to set up a server or project
+# Asks whether you want to set up a server or app
 if [ "$1" == 'setup' ] && [ -z $2 ];
 then
   sh ./setup.sh
@@ -29,11 +29,11 @@ then
   exit 0
 fi
 
-# fp setup project
-# Asks questions and then sets up project on server
-if [ "$1" == 'setup' ] &&  [ "$2" == 'project' ];
+# fp setup app
+# Asks questions and then sets up app on server
+if [ "$1" == 'setup' ] &&  [ "$2" == 'app' ];
 then
-  sh ./setup-project.sh
+  sh ./setup-app.sh
   exit 0
 fi
 
@@ -46,14 +46,15 @@ fi
 if [ -z "$1" ];
 then
   echo "What do you wish to do?"
-  options=("server setup 🗿" "project setup 🌱" "project deploy 🚀")
+  options=("setup server 🗿" "setup app 🌱" "deploy 🚀")
   select option in "${options[@]}"; do
     [ "$option" ] && break
     echo "Please enter a number from the list."
   done
-  [ "$option" == "server setup 🗿" ] && ./setup-server.sh
-  [ "$option" == "project setup 🌱" ] && ./setup-project.sh
-  [ "$option" == "project deploy 🚀" ] && echo "🚧 under construction 🚧"
+  [ "$option" == "setup server 🗿" ] && ./setup-server.sh
+  [ "$option" == "setup app 🌱" ] && ./setup-app.sh
+  [ "$option" == "deploy 🚀" ] && ./deploy.sh "$caller_dir"
+  
   echo "----------"
 fi
 

@@ -7,7 +7,7 @@ echo "----------"
 echo "Installing lambda theme for Fish ..."
 omf install lambda
 echo "----------"
-echo "Create directories for projects"
+echo "Create domain root directory"
 sudo mkdir -p /var/www/
 sudo chown -R admin:admin /var/www/
 ls -la /var/www/

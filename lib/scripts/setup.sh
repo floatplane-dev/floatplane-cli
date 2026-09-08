@@ -10,7 +10,7 @@ IFS=""
 echo "SETUP"
 echo "----------"
 echo "What do you wish to set up?"
-options=("server 🗿" "project 🌱")
+options=("server 🗿" "app 🌱")
 select option in ${options[@]}
 do
   if [[ "${options[*]}" =~ "${option}" ]]; then
@@ -24,7 +24,7 @@ if [ "$option" == "server 🗿" ];
 then
   ./setup-server.sh
 fi
-if [ "$option" == "project 🌱" ];
+if [ "$option" == "app 🌱" ];
 then
-  ./setup-project.sh
+  ./setup-app.sh
 fi

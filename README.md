@@ -37,19 +37,19 @@ This command will:
 
 Tested and optimised for Debian servers spun up at [Vultr](https://www.vultr.com) or [Digital Ocean](https://www.digitalocean.com).
 
-### 2. Sets up projects
+### 2. Sets up apps
 
 ```bash
-fp setup project
+fp setup app
 ```
 
 This command will:
 
-- Set up a Node, Deno or Ruby based project on your server
-- Configure Nginx to direct your domain to your project
+- Set up a Node, Deno or Ruby based apps on your server
+- Configure Nginx to direct your domain to your app
 - Set up a deployment hook for CLI tools to hit
 
-### 3. Deploy a project
+### 3. Deploy an app
 
 ```
 fp deploy
@@ -57,8 +57,8 @@ fp deploy
 
 This command will:
 
-- Ask you which project to deploy
-- Hit the deployment hook of your project to deploy the latest production code
+- Ask you which app to deploy
+- Hit the deployment hook of your app to deploy the latest production code
 
 Ideally have your CI tools do this. But yes, sometimes a manual deploy is necessary.
 
