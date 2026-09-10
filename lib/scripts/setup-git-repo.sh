@@ -22,6 +22,13 @@ if [ -d "/var/www/$DOMAIN" ]; then
   echo "----------"
   echo "✅ Git repo already exists"
   echo "----------"
+  echo "Pulling latest code ..."
+  cd /var/www/$DOMAIN
+  sudo -u $DEPLOY_USER bash -lc 'git reset --hard'
+  sudo -u $DEPLOY_USER bash -lc 'git checkout production'
+  sudo -u $DEPLOY_USER bash -lc 'git pull'
+  echo "✅ done"
+  echo "----------"
 else
   echo "----------"
   echo "Creating git repo 🦑"
