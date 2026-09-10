@@ -56,6 +56,7 @@ then
   done
   [ "$option" == "setup server 🗿" ] && ./setup-server.sh
   [ "$option" == "setup app 🌱" ] && ./setup-app.sh "$caller_dir"
+  [ "$option" == "remove app ❤️‍🔥" ] && ./remove-app.sh "$caller_dir"
   [ "$option" == "deploy 🚀" ] && ./deploy.sh "$caller_dir"
   
   echo "----------"
