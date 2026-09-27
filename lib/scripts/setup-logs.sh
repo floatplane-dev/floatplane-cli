@@ -41,21 +41,26 @@ else
     # Create directory for logging to
     sudo mkdir /var/log/$DOMAIN
 
-    # Make the deploy user owner of the logs
-    sudo chown -R $DEPLOY_USER:$DEPLOY_USER /var/log/$DOMAIN
-    sudo chmod 775 /var/log/$DOMAIN
+    # Make the deploy user owner of the logs.
+    sudo chown $DEPLOY_USER:$DEPLOY_USER /var/log/$DOMAIN
+    sudo chmod 755 /var/log/$DOMAIN
 
     # Grant admin access to the logs
     sudo setfacl -R -m u:$SUDO_USER:rwx /var/log/$DOMAIN/
     sudo setfacl -R -d -m u:$SUDO_USER:rwx /var/log/$DOMAIN/
     sudo getfacl /var/log/$DOMAIN/
 
-    # Allow Nginx to also write logs
+    # Allow Nginx to also write logs (group membership for other shared paths)
     sudo usermod -aG $DEPLOY_USER www-data
     sudo systemctl restart nginx
 
-    # Never keeps logs older than 7 days
-    sudo tee /etc/logrotate.d/$DOMAIN > /dev/null <<EOF
+    echo "----------"
+    echo "✅ Created /var/log/$DOMAIN"
+    echo "----------"
+fi
+
+# Never keeps logs older than 7 days
+sudo tee /etc/logrotate.d/$DOMAIN > /dev/null <<EOF
 /var/log/$DOMAIN/*.log {
     daily
     rotate 7
@@ -65,8 +70,3 @@ else
     copytruncate
 }
 EOF
-
-    echo "----------"
-    echo "✅ Created /var/log/$DOMAIN"
-    echo "----------"
-fi

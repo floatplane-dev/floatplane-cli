@@ -24,11 +24,6 @@ if [ "$SSH_HOST" != "melbourne" ] && [ "$SSH_HOST" != "amsterdam" ]; then
   exit 1
 fi
 
-if [ -z "$DOMAIN" ]; then
-  echo "❌ no DOMAIN"
-  exit 1
-fi
-
 if [ "$TECH" != "svelte" ] && [ "$TECH" != "rails" ]; then
   echo "❌ unsupported TECH: $TECH"
   exit 1

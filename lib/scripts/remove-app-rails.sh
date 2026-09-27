@@ -70,14 +70,18 @@ echo "----------"
 echo "WWW"
 echo "----------"
 echo "delete codebase"
-rm -rf /var/www/$DOMAIN
+sudo rm -rf /var/www/$DOMAIN
 echo "✅"
 echo "----------"
 echo "LOGS"
 echo "----------"
+echo "delete log rotation"
+sudo rm -rf /etc/logrotate.d/$DOMAIN
+echo "----------"
 echo "delete logs"
-rm -rf /var/log/$DOMAIN
+sudo rm -rf /var/log/$DOMAIN
 echo "✅"
+
 
 # echo "----------"
 # echo "USERS"

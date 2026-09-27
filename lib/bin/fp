@@ -46,6 +46,12 @@ then
   exit 0
 fi
 
+if [ "$1" == 'backup' ];
+then
+  ./backup.sh "$caller_dir"
+  exit 0
+fi
+
 if [ -z "$1" ];
 then
   echo "What do you wish to do?"
@@ -58,6 +64,7 @@ then
   [ "$option" == "setup app 🌱" ] && ./setup-app.sh "$caller_dir"
   [ "$option" == "remove app ❤️‍🔥" ] && ./remove-app.sh "$caller_dir"
   [ "$option" == "deploy 🚀" ] && ./deploy.sh "$caller_dir"
+  [ "$option" == "backup 👯‍♀️" ] && ./backup.sh "$caller_dir"
   
   echo "----------"
 fi
