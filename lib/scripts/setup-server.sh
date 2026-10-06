@@ -20,24 +20,46 @@ wait_until_yes() {
 echo "Setting up server 🗿"
 echo "----------"
 echo "Have you done the following?"
-echo "👉🏼 Created Debian server at Vultr with 2GB of RAM"
-echo "👉🏼 Named the server according this pattern:"
-echo "    ↳ sydney-server-floatplane-dev"
-echo "    ↳ frankfurt-server-interflux-com"
-echo "👉🏼 Created A and AAAA pointing to that server with identical name patterns:"
-echo "    ↳ sydney.server.floatplane.dev"
-echo "    ↳ frankfurt.server.interflux.com"
+echo "👉🏼 Spun up a server"
+echo "    ↳ at Vultr"
+echo "    ↳ Debian OS"
+echo "    ↳ 2GB RAM minimum"
+echo "    ↳ with name like:"
+echo "       ↳ floatplane-server-amsterdam"
+echo "       ↳ interflux-server-frankfurt"
+echo "👉🏼 Created an SSH alias:"
+echo "    ~/.ssh/config"
+echo "    Host amsterdam"
+echo "      User admin"
+echo "      HostName 45.32.237.173"
+echo "      IdentityFile ~/.ssh/floatplane"
+
 wait_until_yes
+
 echo "----------"
-echo "Enter the domain name (e.g. sydney.server.floatplane.dev):"
-read DOMAIN
-echo "----------"
-echo "Enter an SSH host alias (e.g. sydney):"
+echo "Enter the SSH alias (e.g. melbourne, amsterdam, ...)"
 read SSH_HOST
 echo "----------"
+echo "Enter the IPv4 of the server:"
+read IP
+echo "----------"
+echo "Copy the root user password."
+echo "You'll have to enter it multiple times."
+echo "Ready?"
+
+wait_until_yes
+
+echo "----------"
+echo "PART 1"
+
+scp ./setup-server-1.sh root@$IP:/
+ssh root@$IP "/setup-server-1.sh"
+
+echo "----------"
+
 ssh_pub_paths=(~/.ssh/*.pub)
 ssh_pub_files=("${ssh_pub_paths[@]##*/}")
-echo "Which public SSH key should be used?"
+echo "Which public SSH key will be used?"
 select ssh_pub_file in "${ssh_pub_files[@]}"; do
   [ -n "$ssh_pub_file" ] && break
   echo "Please enter a number from the list."
@@ -45,63 +67,45 @@ done
 ssh_pub_path="${ssh_pub_paths[$((REPLY-1))]}"
 echo "ssh_pub_path: $ssh_pub_path"
 echo "ssh_pub_file: $ssh_pub_file"
-echo "----------"
-local_name=$(scutil --get ComputerName)
-echo "Configuring SSH on: $local_name"
-echo "" >> ~/.ssh/config
-echo "" >> ~/.ssh/config
-cat <<EOF >> ~/.ssh/config
-Host $SSH_HOST
-  User $SUDO_USER
-  HostName $DOMAIN
-  IdentityFile ~/.ssh/$ssh_pub_file
-EOF
-echo "----------"
-echo "Uploading part 1..."
-echo "You will need to enter the root password twice."
-scp ./setup-server-1.sh root@$DOMAIN:/
-echo "----------"
-echo "Running part 1..."
-ssh root@$DOMAIN "/setup-server-1.sh"
-echo "----------"
-echo "Uploading $pub to server..."
+
+echo "Uploading $ssh_pub_path to server..."
+echo "Enter the $SUDO_USER's password (sudo user)."
+
 # Note: the -f is necessary when there is no private key adjacent to the .pub (we use 1Password)
 ssh-copy-id -f -i $ssh_pub_path $SSH_HOST
+
+echo "✅ done"
 echo "----------"
-echo "Uploading part 2..."
+echo "PART 2"
+
 scp ./setup-server-2.sh $SSH_HOST:~/
-echo "----------"
-echo "Running part 2..."
 ssh -t $SSH_HOST "~/setup-server-2.sh"
+
 echo "----------"
-echo "Testing if root can still access server..."
+echo "Next we test if root user can still access server."
 echo "Enter the password of the root user 3 times:"
-if ! ssh root@$DOMAIN "pwd"
+
+if ! ssh root@$IP "pwd"
 then
-  echo "Root SSH failed, which is good! 🥳"
+  echo "✅ Root SSH failed, which is good! 🥳"
 else
-  echo "Root SSH succeeded... "
-  echo "Something went wrong. 🤔"
-  echo "Aborting..."
+  echo "❌ Root SSH succeeded... "
+  echo "❌ Something went wrong. 🤔"
+  echo "❌ Aborting..."
   exit 0;
 fi
+
 echo "----------"
-echo "Uploading part 3..."
+echo "PART 3"
 scp ./setup-server-3.sh $SSH_HOST:~/
-echo "----------"
-echo "Running part 3..."
 ssh -t $SSH_HOST "~/setup-server-3.sh"
 echo "----------"
-echo "Uploading part 4..."
+echo "PART 4"
 scp ./setup-server-4.sh $SSH_HOST:~/
-echo "----------"
-echo "Running part 4..."
 ssh -t $SSH_HOST "~/setup-server-4.sh"
 echo "----------"
-echo "Uploading part 5..."
+echo "PART 5"
 scp ./setup-server-5.sh $SSH_HOST:~/
-echo "----------"
-echo "Running part 5..."
 ssh -t $SSH_HOST "~/setup-server-5.sh"
 echo "----------"
 echo "Server setup complete 🗿"
@@ -109,7 +113,7 @@ echo "----------"
 echo "NEXT STEPS"
 echo ""
 echo "Wait 10 seconds, then SSH in with:"
-echo "🔑 ssh $SUDO_USER@$DOMAIN"
+echo "🔑 ssh $SUDO_USER@$IP"
 echo "🔑 ssh $SSH_HOST"
 echo ""
 echo "Then verify:"
