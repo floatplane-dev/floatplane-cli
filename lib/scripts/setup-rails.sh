@@ -116,6 +116,7 @@ if [ ! -f config/credentials/production.key ]; then
     echo "Enter the config/credentials/production.key:"
     read -s PRODUCTION_KEY
     echo $PRODUCTION_KEY >> config/credentials/production.key
+    sudo chown $DEPLOY_USER:$DEPLOY_USER config/credentials/production.key
     echo "✅ Done"
 else
     echo "----------"

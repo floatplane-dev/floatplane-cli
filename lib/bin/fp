@@ -46,16 +46,23 @@ then
   exit 0
 fi
 
-if [ "$1" == 'backup' ];
+if [ "$1" == 'sync' ];
 then
-  ./backup.sh "$caller_dir"
+  ./sync-data.sh "$caller_dir"
   exit 0
 fi
 
 if [ -z "$1" ];
 then
   echo "What do you wish to do?"
-  options=("setup server 🗿" "setup app 🌱" "deploy 🚀")
+  options=(
+    "setup server 🗿"
+    "setup app 🌱"
+    "remove app ❤️‍🔥"
+    "deploy 🚀"
+    "sync data 👯‍♀️"
+  )
+  COLUMNS=1
   select option in "${options[@]}"; do
     [ "$option" ] && break
     echo "Please enter a number from the list."
@@ -64,7 +71,7 @@ then
   [ "$option" == "setup app 🌱" ] && ./setup-app.sh "$caller_dir"
   [ "$option" == "remove app ❤️‍🔥" ] && ./remove-app.sh "$caller_dir"
   [ "$option" == "deploy 🚀" ] && ./deploy.sh "$caller_dir"
-  [ "$option" == "backup 👯‍♀️" ] && ./backup.sh "$caller_dir"
+  [ "$option" == "sync data 👯‍♀️" ] && ./sync-data.sh "$caller_dir"
   
   echo "----------"
 fi

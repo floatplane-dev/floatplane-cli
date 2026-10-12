@@ -17,13 +17,13 @@ wait_until_yes() {
 }
 
 echo "Setting up app 🌱"
-echo "----------"
 
 if [ -f "$APP_DIR/.fprc" ]; then
   source "$APP_DIR/.fprc"
 fi
 
 if [ -z "${SSH_HOST:-}" ] || [ -z "${DOMAIN:-}" ] || [ -z "${TECH:-}" ]; then
+  echo "----------"
   echo "On which server? 🚀"
   echo "Enter the SSH alias (e.g. melbourne, amsterdam, ...)"
   read SSH_HOST
@@ -76,10 +76,6 @@ TECH=$TECH
 EOF
 fi
 
-echo "----------"
-echo "Connecting to $SSH_HOST ..."
-echo "----------"
-
 if [[ $TECH == "rails" ]]; then
   echo "----------"
   echo "Does the production branch of your Rails codebase have all of these?"
@@ -87,12 +83,15 @@ if [[ $TECH == "rails" ]]; then
   echo " ↳ config/credentials/production.yml.enc"
   echo " ↳ config/puma.service"
   echo " ↳ nginx/$DOMAIN.conf"
-  echo " ↳ GET /api/sanity-check"
+  echo " ↳ tmp/sockets/.keep"
+  echo " ↳ tmp/pids/.keep"
 
   wait_until_yes
 
   echo "----------"
   echo "✅ Code base is ready"
+  echo "----------"
+  echo "Connecting to $SSH_HOST ..."
   echo "----------"
 
   scp ./setup-deploy-user.sh $SSH_HOST:~/
@@ -133,6 +132,8 @@ if [[ $TECH == "svelte" ]]; then
 
   echo "----------"
   echo "✅ Code base is ready"
+  echo "----------"
+  echo "Connecting to $SSH_HOST ..."
   echo "----------"
 
   scp ./setup-deploy-user.sh $SSH_HOST:~/
@@ -179,7 +180,9 @@ if [[ $TECH == "html" ]]; then
   echo "----------"
   echo "✅ Code base is ready"
   echo "----------"
-
+  echo "Connecting to $SSH_HOST ..."
+  echo "----------"
+  
   scp ./setup-deploy-user.sh $SSH_HOST:~/
   ssh -t $SSH_HOST "~/setup-deploy-user.sh"
 
