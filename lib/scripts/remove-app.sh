@@ -56,3 +56,8 @@ if [ "$TECH" != "rails" ]; then
     scp ./remove-app-rails.sh $SSH_HOST:~/
     ssh -t $SSH_HOST "~/remove-app-rails.sh $DOMAIN"
 fi
+
+if [ "$TECH" != "svelte" ]; then
+    scp ./remove-app-svelte.sh $SSH_HOST:~/
+    ssh -t $SSH_HOST "~/remove-app-svelte.sh $DOMAIN"
+fi
