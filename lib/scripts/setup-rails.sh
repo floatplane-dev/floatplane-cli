@@ -143,9 +143,13 @@ else
     echo "✅ RAILS_ENV already set, skipping"
 fi
 
-# POSTGRES USER
+# POSTGRES USERS
 
 if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DEPLOY_USER'" | grep -q 1; then
+    echo "----------"
+    echo "Creating Postgres super user named \"admin\""
+    sudo -u postgres createuser -s admin
+    echo "✅ Done"
     echo "----------"
     echo "Creating Postgres user named \"$DEPLOY_USER\" ..."
     sudo -u postgres createuser -s $DEPLOY_USER
