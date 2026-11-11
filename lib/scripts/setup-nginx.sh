@@ -3,51 +3,14 @@
 set -e
 
 DOMAIN=$1
+CA=$2
+REDIRECT_WWW=$3
 
-wait_until_yes() {
-    while true; do
-    select answer in yes no; do
-        case $answer in
-        yes) break 2;;
-        no)  echo "Please do so now";;
-        *)   echo "Invalid choice";;
-        esac
-    done
-    done
-}
-
-echo "----------"
-echo "Setting up Nginx..."
-echo "----------"
-echo "Have you done all of the below? 🥦" 
-echo "👉🏼 The A and AAAA records of $DOMAIN are pointing at the IP of server $server."
-echo "👉🏼 The code base has nginx/$DOMAIN.conf for HTTPS setup."
-
-wait_until_yes
-
-echo "----------"
-echo "Does www.$DOMAIN need to redirect to $DOMAIN? 🪃  (true/false)"
-boolean=(true false)
-select redirect_www in ${boolean[@]}
-do
-  if [[ "${boolean[*]}" =~ "${redirect_www}" ]]; then
-    break
-  else
-    echo "Please enter a number from the list."
-  fi
-done
-
-if [ "$redirect_www" = true ] ; then
+if [ "$CA" = "Let's Encrypt" ] ; then
   echo "----------"
-  echo "Are the A and AAAA records of www.$DOMAIN also pointing at the IP of server $server? 🍉"
-  wait_until_yes
-fi
-
-# NGINX, CERTBOT, HTTPS CERTIFICATES
-
-echo "----------"
-echo "Configuring Nginx for HTTP..."
-sudo cat <<EOF > /etc/nginx/sites-available/$DOMAIN.temp.conf
+  echo "Setting up Nginx with Let's Encrypt"
+  echo "----------"
+  sudo cat <<EOF > /etc/nginx/sites-available/$DOMAIN.temp.conf
 server
 {
   listen 80;
@@ -60,31 +23,95 @@ server
   }
 }
 EOF
-sudo ln -nsf /etc/nginx/sites-available/$DOMAIN.temp.conf /etc/nginx/sites-enabled/$DOMAIN.conf
-echo "----------"
-echo "Testing Nginx configs..."
-sudo nginx -t
-echo "----------"
-echo "Restarting Nginx..."
-sudo systemctl restart nginx
-echo "----------"
-echo "Creating SSL certificates..."
-sudo certbot certonly --nginx -d $DOMAIN
-if [ "$redirect_www" = true ] ; then
-  echo "Creating extra certificate for redirecting www"
-  sudo certbot certonly --nginx -d www.$DOMAIN
+  echo "✅ created temporary HTTP Nginx config."
+  echo "----------"
+  sudo ln -nsf /etc/nginx/sites-available/$DOMAIN.temp.conf /etc/nginx/sites-enabled/$DOMAIN.conf
+  echo "✅ created symbolic link to temporary Nginx config"
+  echo "----------"
+  sudo nginx -t
+  echo "✅ passed Nginx test"
+  echo "----------"
+  sudo systemctl restart nginx
+  sudo systemctl status nginx --no-pager
+  echo "✅ restarted Nginx service"
+  echo "----------"
+  echo "Creating TLS certificates..."
+  sudo certbot certonly --nginx -d $DOMAIN
+  echo "✅ created TLS certificate at Let's Encrypt for apex domain"
+  echo "----------"
+  if [ "$REDIRECT_WWW" = true ] ; then
+    sudo certbot certonly --nginx -d www.$DOMAIN
+    echo "✅ created TLS certificate at Let's Encrypt for www domain"
+    echo "----------"
+  fi
+  echo "----------"
+  echo "Removing temporary HTTP config..."
+  rm -rf /etc/nginx/sites-available/$DOMAIN.temp.conf
+  echo "✅ removed temporary Nginx config"
+  echo "----------"
 fi
+
+if [ "$CA" = "Cloudflare" ] ; then
+  echo "----------"
+  echo "Setting up Nginx with Cloudflare"
+  echo "----------"
+  echo "TODO 👋"
+  echo "1. Go to Cloudflare → SSL/TLS → Origin Server → Create Certificate"
+  echo "2. Create certificate with:"
+  echo "   ↳ Type: RSA"
+  echo "   ↳ Hostnames: *.foo.com and foo.com"
+  echo "   ↳ Validity: 15 years"
+  echo "   ↳ Format: PEM"
+  echo "3. Copy the Origin Certificate and paste below:"
+
+  CF_CERT=""
+  while IFS= read -rs line; do
+    CF_CERT+="$line"$'\n'
+    [[ "$line" == *"END CERTIFICATE"* ]] && break
+  done
+
+  echo "4. Copy the Private Key and paste below:"
+
+  CF_KEY=""
+  while IFS= read -rs line; do
+    CF_KEY+="$line"$'\n'
+    [[ "$line" == *"END"* && "$line" == *"KEY"* ]] && break
+  done
+  echo
+
+  echo "----------"
+  if [[ -d /etc/ssl/cloudflare ]]; then
+    echo "✅ /etc/ssl/cloudflare already exists"
+  else
+    sudo mkdir -p /etc/ssl/cloudflare
+    echo "✅ created /etc/ssl/cloudflare"
+  fi
+  echo "----------"
+  sudo tee /etc/ssl/cloudflare/$DOMAIN.pem > /dev/null <<EOF
+$CF_CERT
+EOF
+  echo "✅ created Cloudflare certificate"
+  echo "----------"
+  sudo tee /etc/ssl/cloudflare/$DOMAIN.key > /dev/null <<EOF
+$CF_KEY
+EOF
+  echo "✅ created Cloudflare private key"
+  echo "----------"
+  sudo chmod 644 /etc/ssl/cloudflare/$DOMAIN.pem
+  sudo chmod 600 /etc/ssl/cloudflare/$DOMAIN.key
+  sudo chown root:root /etc/ssl/cloudflare/*
+  echo "✅ Set permissions"
+fi
+
 echo "----------"
-echo "Configuring Nginx for HTTPS..."
 sudo ln -nsf /var/www/$DOMAIN/nginx/$DOMAIN.conf /etc/nginx/sites-enabled/$DOMAIN.conf
+echo "✅ created symbolic link to final Nginx config"
 echo "----------"
-echo "Removing temporary HTTP config..."
-rm -rf /etc/nginx/sites-available/$DOMAIN.temp.conf
-echo "----------"
-echo "Testing Nginx configs... (again)"
 sudo nginx -t
+echo "✅ passed Nginx test"
 echo "----------"
-echo "Restarting Nginx... (again)"
 sudo systemctl restart nginx
+sudo systemctl status nginx --no-pager
+echo "✅ restarted Nginx"
 echo "----------"
 echo "Done!"

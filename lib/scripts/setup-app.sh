@@ -20,34 +20,21 @@ echo "Setting up app 🌱"
 
 if [ -f "$APP_DIR/.fprc" ]; then
   source "$APP_DIR/.fprc"
+else
+  touch "$APP_DIR/.fprc"
 fi
 
-if [ -z "${SSH_HOST:-}" ] || [ -z "${DOMAIN:-}" ] || [ -z "${TECH:-}" ]; then
+if [ -z "${SSH_HOST:-}" ]; then
   echo "----------"
-  echo "On which server? 🚀"
+  echo "On which server? 🗿"
   echo "Enter the SSH alias (e.g. melbourne, amsterdam, ...)"
   read SSH_HOST
+  echo "SSH_HOST=$SSH_HOST" >> "$APP_DIR/.fprc"
+fi
 
-  # ssh_aliases=(`grep "^Host " ~/.ssh/config | awk '{print $2}' | sort -u`)
-  # select ssh_alias in "${ssh_aliases[@]}"; do
-  #   [ "$ssh_alias" ] && break
-  #   echo "Please enter a number from the list."
-  # done
-  # 
-  # HAS ODD BUG
-  # ----------
-  # 1) setup-deno.sh	   9) setup-server-1.sh	    17) frankfurt
-  # 2) setup-ember.sh	  10) setup-server-2.sh	    18) github.com
-  # 3) setup-git-repo.sh	  11) setup-server-3.sh	    19) madrid
-  # 4) setup-gulp.sh	  12) setup-server-4.sh	    20) melbourne
-  # 5) setup-logrotation.sh	  13) setup-server-5.sh	    21) mexico
-  # 6) setup-nginx.sh	  14) setup-server.sh	    22) osaka
-  # 7) setup-app.sh	  15) setup.sh		    23) paris
-  # 8) setup-rails.sh	  16) amsterdam
-
+if [ -z "${TECH:-}" ]; then
   echo "----------"
   echo "What kind of app?"
-
   options[0]="rails"
   options[1]="svelte"
   options[2]="html"
@@ -62,34 +49,93 @@ if [ -z "${SSH_HOST:-}" ] || [ -z "${DOMAIN:-}" ] || [ -z "${TECH:-}" ]; then
       echo "Please enter a number from the list."
     fi
   done
-
-  
-
-  echo "----------"
-  echo "What's the main domain name of the app? ⛵ (foo.com)"
-  read DOMAIN
-
-  cat > "$APP_DIR/.fprc" <<EOF
-SSH_HOST=$SSH_HOST
-DOMAIN=$DOMAIN
-TECH=$TECH
-EOF
+  echo "TECH=$TECH" >> "$APP_DIR/.fprc"
 fi
 
-if [[ $TECH == "rails" ]]; then
+if [ -z "${DOMAIN:-}" ]; then
   echo "----------"
-  echo "Does the production branch of your Rails codebase have all of these?"
-  echo " ↳ .ruby-version"
-  echo " ↳ config/credentials/production.yml.enc"
-  echo " ↳ config/puma.service"
-  echo " ↳ nginx/$DOMAIN.conf"
-  echo " ↳ tmp/sockets/.keep"
-  echo " ↳ tmp/pids/.keep"
+  echo "What's the main domain name of the app? 🥦 (foo.com)"
+  read DOMAIN
+  echo "DOMAIN=$DOMAIN" >> "$APP_DIR/.fprc"
+fi
 
+if [ -z "${REDIRECT_WWW:-}" ]; then
+  echo "----------"
+  echo "Does www.$DOMAIN need to redirect to $DOMAIN? 🪃 (true/false)"
   wait_until_yes
+  echo "REDIRECT_WWW=true" >> "$APP_DIR/.fprc"
+fi
 
+if [ -z "${CA:-}" ]; then
   echo "----------"
-  echo "✅ Code base is ready"
+  echo "Choose the Certificate Authority (CA) for TLS 🔒"
+  options=()
+  options[0]="Cloudflare"
+  options[1]="Let's Encrypt"
+  select CA in "${options[@]}"
+  do
+    if [[ "${options[*]}" =~ "${CA}" ]]; then
+      break
+    else
+      echo "Please enter a number from the list."
+    fi
+  done
+  echo "CA=$CA" >> "$APP_DIR/.fprc"
+fi
+
+if [ -z "${DOMAIN_READY:-}" ]; then
+  echo "----------"
+  echo "Do the A and AAAA records of $DOMAIN point to the IP of server $SSH_HOST? 👉"
+  wait_until_yes
+  
+  if [ "$REDIRECT_WWW" = true ] ; then
+    echo "----------"
+    echo "Do the A and AAAA records of www.$DOMAIN point to the IP of server $SSH_HOST? 👈"
+    wait_until_yes
+  fi
+
+  if [ "$CA" = "Cloudflare" ] ; then
+    echo "----------"
+    echo "Has $DOMAIN's TLS encryption mode been set to Full (strict)?"
+    wait_until_yes
+    echo "----------"
+    echo "Is $DOMAIN's being proxied? (orange cloud, not grey DNS only)"
+    wait_until_yes
+    if [ "$REDIRECT_WWW" = true ] ; then
+      echo "----------"
+      echo "Is www.$DOMAIN's being proxied? (orange cloud, not grey DNS only)"
+      wait_until_yes
+    fi
+  fi
+
+  echo "DOMAIN_READY=true" >> "$APP_DIR/.fprc"
+fi
+
+echo "----------"
+echo "✅ domain name is ready"
+
+# --------------------------------------------------------------------------------------------------
+
+if [[ $TECH == "rails" ]]; then
+
+  if [ -z "${CODE_READY:-}" ]; then
+    echo "----------"
+    echo "Does the codebase have the following?"
+    echo "✅ production git branch"
+    echo "✅ .ruby-version"
+    echo "✅ config/credentials/production.yml.enc"
+    echo "✅ config/puma.service"
+    echo "✅ nginx/$DOMAIN.conf"
+    echo "✅ tmp/sockets/.keep"
+    echo "✅ tmp/pids/.keep"
+
+    wait_until_yes
+
+    echo "CODE_READY=true" >> "$APP_DIR/.fprc"
+    echo "----------"
+    echo "✅ Code base is ready"
+  fi
+
   echo "----------"
   echo "Connecting to $SSH_HOST ..."
   echo "----------"
@@ -107,7 +153,7 @@ if [[ $TECH == "rails" ]]; then
   ssh -t $SSH_HOST "~/setup-rails.sh $DOMAIN"
 
   scp ./setup-nginx.sh $SSH_HOST:~/
-  ssh -t $SSH_HOST "~/setup-nginx.sh $DOMAIN"
+  ssh -t $SSH_HOST "~/setup-nginx.sh $DOMAIN $CA $REDIRECT_WWW"
 
   echo "----------"
   echo "✅ Done"
@@ -119,41 +165,69 @@ if [[ $TECH == "rails" ]]; then
   echo "----------"
 fi
 
+# --------------------------------------------------------------------------------------------------
+
 if [[ $TECH == "svelte" ]]; then
-  echo "----------"
-  echo "Have you done the following? 🥦"
-  echo "👉🏼 Created git branch named: production"
-  echo "👉🏼 @svelte/adaptor-node"
-  echo "👉🏼 .env.example"
-  echo "👉🏼 systemd.service"
-  echo "👉🏼 nginx/$DOMAIN.conf"
+  if [ -z "${CODE_READY:-}" ]; then
+    echo "----------"
+    echo "Does the codebase have the following?"
+    echo "✅ production git branch"
+    echo "✅ @svelte/adaptor-node"
+    echo "✅ .env.example"
+    echo "✅ systemd.service"
+    echo "✅ nginx/$DOMAIN.conf"
 
-  wait_until_yes
+    wait_until_yes
 
+    echo "CODE_READY=true" >> "$APP_DIR/.fprc"
+  fi
   echo "----------"
-  echo "✅ Code base is ready"
+  echo "✅ code base is ready"
   echo "----------"
   echo "Connecting to $SSH_HOST ..."
   echo "----------"
-
-  scp ./setup-deploy-user.sh $SSH_HOST:~/
-  ssh -t $SSH_HOST "~/setup-deploy-user.sh"
-
-  scp ./setup-logs.sh $SSH_HOST:~/
-  ssh -t $SSH_HOST "~/setup-logs.sh $DOMAIN"
-
-  scp ./setup-git-repo.sh $SSH_HOST:~/
-  ssh -t $SSH_HOST "~/setup-git-repo.sh $DOMAIN"
-
-  scp ./setup-nvm.sh $SSH_HOST:~/
-  ssh -t $SSH_HOST "~/setup-nvm.sh"
-
-  scp ./setup-svelte.sh $SSH_HOST:~/
-  ssh -t $SSH_HOST "~/setup-svelte.sh $DOMAIN $SSH_HOST"
-
-  scp ./setup-nginx.sh $SSH_HOST:~/
-  ssh -t $SSH_HOST "~/setup-nginx.sh $DOMAIN"
-
+  if [ -z "${DEPLOY_USER_READY:-}" ]; then
+    scp ./setup-deploy-user.sh $SSH_HOST:~/
+    ssh -t $SSH_HOST "~/setup-deploy-user.sh"
+    echo "DEPLOY_USER_READY=true" >> "$APP_DIR/.fprc"
+  fi
+  echo "----------"
+  echo "✅ deploy user is ready"
+  if [ -z "${LOGS_READY:-}" ]; then
+    scp ./setup-logs.sh $SSH_HOST:~/
+    ssh -t $SSH_HOST "~/setup-logs.sh $DOMAIN"
+    echo "LOGS_READY=true" >> "$APP_DIR/.fprc"
+  fi
+  echo "----------"
+  echo "✅ logs are ready"
+  if [ -z "${REPO_READY:-}" ]; then
+    scp ./setup-git-repo.sh $SSH_HOST:~/
+    ssh -t $SSH_HOST "~/setup-git-repo.sh $DOMAIN"
+    echo "REPO_READY=true" >> "$APP_DIR/.fprc"
+  fi
+  echo "----------"
+  echo "✅ git repo is ready"
+  if [ -z "${NODE_READY:-}" ]; then
+    scp ./setup-nvm.sh $SSH_HOST:~/
+    ssh -t $SSH_HOST "~/setup-nvm.sh"
+    echo "NODE_READY=true" >> "$APP_DIR/.fprc"
+  fi
+  echo "----------"
+  echo "✅ Node is ready"
+  if [ -z "${SVELTE_READY:-}" ]; then
+    scp ./setup-svelte.sh $SSH_HOST:~/
+    ssh -t $SSH_HOST "~/setup-svelte.sh $DOMAIN $SSH_HOST"
+    echo "SVELTE_READY=true" >> "$APP_DIR/.fprc"
+  fi
+  echo "----------"
+  echo "✅ Svelte is ready"
+  if [ -z "${NGINX_READY:-}" ]; then
+    scp ./setup-nginx.sh $SSH_HOST:~/
+    ssh -t $SSH_HOST "~/setup-nginx.sh $DOMAIN $CA $REDIRECT_WWW"
+    echo "NGINX_READY=true" >> "$APP_DIR/.fprc"
+  fi
+  echo "----------"
+  echo "✅ Nginx is ready"
   echo "----------"
   echo "✅ Done"
   echo "----------"
@@ -170,15 +244,21 @@ if [[ $TECH == "svelte" ]]; then
   echo "----------"
 fi
 
+# --------------------------------------------------------------------------------------------------
+
 if [[ $TECH == "html" ]]; then
-  echo "----------"
-  echo "Have you done the following? 🥦"
-  echo "👉🏼 Created git branch named: production"
 
-  wait_until_yes
+  if [ -z "${CODE_READY:-}" ]; then
+    echo "----------"
+    echo "Have you done the following?"
+    echo "✅ production git branch"
 
-  echo "----------"
-  echo "✅ Code base is ready"
+    wait_until_yes
+
+    echo "----------"
+    echo "✅ Code base is ready"
+  fi
+
   echo "----------"
   echo "Connecting to $SSH_HOST ..."
   echo "----------"
@@ -193,7 +273,7 @@ if [[ $TECH == "html" ]]; then
   ssh -t $SSH_HOST "~/setup-git-repo.sh $DOMAIN"
 
   scp ./setup-nginx.sh $SSH_HOST:~/
-  ssh -t $SSH_HOST "~/setup-nginx.sh $DOMAIN"
+  ssh -t $SSH_HOST "~/setup-nginx.sh $DOMAIN $CA $REDIRECT_WWW"
 
   echo "----------"
   echo "✅ Done"
